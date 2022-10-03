@@ -4,6 +4,8 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Icon } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
@@ -17,7 +19,7 @@ const MapScreen = () => {
   const navigation = useNavigation();
 
   return (
-    <SafeAreaView style={tw`android:pt-[${h}]`}>
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={"height"}>
       <View>
         <TouchableOpacity
           onPress={() => navigation.navigate("HomeScreen")}
@@ -32,7 +34,7 @@ const MapScreen = () => {
           <MapScreenNavigation />
         </View>
       </View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 

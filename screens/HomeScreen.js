@@ -1,5 +1,13 @@
 import React from "react";
-import { StyleSheet, Image, View, StatusBar, SafeAreaView } from "react-native";
+import {
+  StyleSheet,
+  Image,
+  View,
+  StatusBar,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 
@@ -19,7 +27,10 @@ const HomeScreen = () => {
   const dispatch = useDispatch();
 
   return (
-    <SafeAreaView style={tw`android:pt-[${h}]`}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <View>
         <View style={tw`p-5`}>
           <Image
@@ -60,7 +71,7 @@ const HomeScreen = () => {
           <NavOptions />
         </View>
       </View>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
