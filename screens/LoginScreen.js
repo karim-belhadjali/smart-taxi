@@ -10,19 +10,19 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from "react-native";
-import {
-  createUserWithEmailAndPassword,
-  PhoneAuthProvider,
-  signInWithCredential,
-} from "firebase/auth";
+import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import {
   FirebaseRecaptchaVerifierModal,
   FirebaseRecaptchaBanner,
 } from "expo-firebase-recaptcha";
-import { auth, app } from "../firebase";
+import { auth, app, functions, httpsCallable } from "../firebase";
+
+import { useDispatch } from "react-redux";
+import { setCurrentUser } from "../app/slices/navigationSlice";
 
 const LoginScreen = () => {
   // Ref or state management hooks
+  const dispatch = useDispatch();
   const recaptchaVerifier = React.useRef(null);
   const [phoneNumber, setPhoneNumber] = React.useState();
   const [verificationId, setVerificationId] = React.useState();
@@ -48,7 +48,7 @@ const LoginScreen = () => {
         <Text style={{ marginTop: 20 }}>Enter phone number</Text>
         <TextInput
           style={{ marginVertical: 10, fontSize: 17 }}
-          placeholder="+1 999 999 9999"
+          placeholder="+216 99 999 999"
           autoFocus
           autoCompleteType="tel"
           keyboardType="phone-pad"
@@ -95,9 +95,32 @@ const LoginScreen = () => {
               );
               await signInWithCredential(auth, credential);
               showMessage({ text: "Phone authentication successful 👍" });
+              dispatch(
+                setCurrentUser({
+                  uid: auth.currentUser.uid,
+                  phoneNumber: auth.currentUser.phoneNumber,
+                })
+              );
+              navigation.navigate("HomeScreen");
             } catch (err) {
               showMessage({ text: `Error: ${err.message}`, color: "red" });
             }
+          }}
+        />
+        <Button
+          title="Complete Profile"
+          disabled={!verificationId}
+          onPress={async () => {
+            const completeUser = httpsCallable(functions, "completeUser");
+            completeUser({
+              text: "test",
+            })
+              .then((e) => {
+                console.log(e);
+              })
+              .catch((error) => {
+                //
+              });
           }}
         />
         {message ? (
