@@ -14,15 +14,15 @@ import {
   selectDestination,
   selectOrigin,
   selectCurrentLocation,
-  selectTravelTimeInfo,
-  setCurrentUser,
   selectCurrentUser,
+  selectDriverLocation,
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setDestination,
   setOrigin,
   setTravelTimeInfo,
+  setDriverLocation,
 } from "../app/slices/navigationSlice";
 
 import MapView, { Marker } from "react-native-maps";
@@ -41,7 +41,7 @@ const MapHomeScreen = () => {
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
   const currentLocation = useSelector(selectCurrentLocation);
-  const travelTimeInfo = useSelector(selectTravelTimeInfo);
+  const driverLocation = useSelector(selectDriverLocation);
   const user = useSelector(selectCurrentUser);
   const mapRef = useRef(null);
 
@@ -79,8 +79,8 @@ const MapHomeScreen = () => {
     createRideRequest({
       uid: user.uid,
       phoneNumber: user.phoneNumber,
-      origin: origin.location,
-      destination: destination.location,
+      origin: origin,
+      destination: destination,
     })
       .then((e) => {
         setrequestSent(true);
@@ -90,7 +90,7 @@ const MapHomeScreen = () => {
   useEffect(() => {
     const ref = onSnapshot(doc(db, "Ride Requests", user.uid), (doc) => {
       if (doc?.data()?.accepted === true) {
-        console.log("accepted");
+        dispatch(setDriverLocation(doc?.data()?.driverLocation));
         if (doc?.data()?.driverId !== "") {
           console.log(doc?.data()?.driverId);
         }
@@ -190,18 +190,18 @@ const MapHomeScreen = () => {
       <MapView
         ref={mapRef}
         initialRegion={{
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
+          latitude: currentLocation.location.lat,
+          longitude: currentLocation.location.lng,
           latitudeDelta: 0.005,
           longitudeDelta: 0.005,
         }}
         mapType="mutedStandard"
-        provider={"google"}
+        provider="google"
         style={tw`flex-1`}
       >
         {origin && destination && (
           <MapViewDirections
-            origin={origin.description}
+            origin={`${origin.location.lat},${origin.location.lng}`}
             destination={destination.description}
             apikey={GOOGLE_MAPS_API_KEY}
             strokeWidth={3}
@@ -209,18 +209,43 @@ const MapHomeScreen = () => {
             lineDashPattern={[0]}
           />
         )}
+        {origin && driverLocation && (
+          <MapViewDirections
+            origin={`${origin.location.lat},${origin.location.lng}`}
+            destination={`${driverLocation.location.lat},${driverLocation.location.lng}`}
+            apikey={GOOGLE_MAPS_API_KEY}
+            strokeWidth={3}
+            strokeColor="red"
+            lineDashPattern={[0]}
+          />
+        )}
         {!origin && (
           <Marker
             coordinate={{
-              latitude: currentLocation.latitude,
-              longitude: currentLocation.longitude,
+              latitude: currentLocation.location.lat,
+              longitude: currentLocation.location.lng,
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
             title="current"
-            description={"origin.description"}
+            description={currentLocation.description}
             identifier="current"
           />
+        )}
+        {driverLocation && (
+          <Marker
+            coordinate={{
+              latitude: driverLocation.location.lat,
+              longitude: driverLocation.location.lng,
+              latitudeDelta: 0.005,
+              longitudeDelta: 0.005,
+            }}
+            title="current"
+            description={driverLocation.description}
+            identifier="current"
+          >
+            <Icon size={50} name="location" type="evilicon" color="#8B8000" />
+          </Marker>
         )}
         {origin?.location && (
           <Marker

@@ -10,6 +10,7 @@ import {
 
 import * as Location from "expo-location";
 import * as Network from "expo-network";
+import { GOOGLE_MAPS_API_KEY } from "@env";
 
 import {
   selectCurrentLocation,
@@ -38,11 +39,17 @@ export default function App() {
         }
 
         await Location.getCurrentPositionAsync({})
-          .then((location) => {
+          .then(async (location) => {
+            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+            const response = await fetch(url);
+            const data = await response.json();
             dispatch(
               setCurrentLocation({
-                latitude: location.coords.latitude,
-                longitude: location.coords.longitude,
+                location: {
+                  lat: location.coords.latitude,
+                  lng: location.coords.longitude,
+                },
+                description: data.results[0].formatted_address,
               })
             );
             setErrorMsg(null);
