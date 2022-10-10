@@ -32,7 +32,7 @@ export default function App() {
       let { isConnected, isInternetReachable } =
         await Network.getNetworkStateAsync();
       if (isConnected && isInternetReachable) {
-        let { status } = await Location.requestForegroundPermissionsAsync();
+        let { status } = await Location.requestBackgroundPermissionsAsync();
         if (status !== "granted") {
           setErrorMsg("Permission to access location was denied");
           return;

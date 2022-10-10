@@ -13,7 +13,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { useDeviceContext } from "twrnc";
-
+import { useKeepAwake } from "expo-keep-awake";
 import tw from "twrnc";
 
 import HomeNavigation from "./components/HomeNavigation";
@@ -21,8 +21,8 @@ import * as Location from "expo-location";
 
 export default function App() {
   useDeviceContext(tw);
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+  useKeepAwake();
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -32,7 +32,6 @@ export default function App() {
       }
 
       let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
     })();
   }, []);
 

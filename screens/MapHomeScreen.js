@@ -50,6 +50,8 @@ const MapHomeScreen = () => {
   const [searching, setsearching] = useState(false);
   const [displaySearchBar, setdisplaySearchBar] = useState(true);
   const [requestSent, setrequestSent] = useState(false);
+  const [requestAccepted, setrequestAccepted] = useState(false);
+  const [driverInfo, setdriverInfo] = useState("");
   useEffect(() => {
     if (!origin || !destination) return;
 
@@ -63,6 +65,7 @@ const MapHomeScreen = () => {
 
   useEffect(() => {
     if (!origin || !destination) return;
+    setdisplaySearchBar(false);
     const getTravelTime = async () => {
       const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
@@ -87,13 +90,18 @@ const MapHomeScreen = () => {
       })
       .catch((error) => {});
   };
+
   useEffect(() => {
+    //if (!requestSent) return;
     const ref = onSnapshot(doc(db, "Ride Requests", user.uid), (doc) => {
       if (doc?.data()?.accepted === true) {
         dispatch(setDriverLocation(doc?.data()?.driverLocation));
-        if (doc?.data()?.driverId !== "") {
-          console.log(doc?.data()?.driverId);
-        }
+        setsearching(false);
+        setrequestAccepted(true);
+        setdriverInfo({
+          driverName: doc.data().driverId,
+          location: doc.data().driverLocation.description,
+        });
       }
     });
     return () => ref();
@@ -294,6 +302,26 @@ const MapHomeScreen = () => {
         >
           <ActivityIndicator size={100} />
         </View>
+      )}
+      {requestAccepted && (
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            height: "100%",
+            width: "100%",
+            backgroundColor: "black",
+            opacity: 0.5,
+            zIndex: 100,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "black",
+          }}
+          onPress={() => setrequestAccepted(false)}
+        >
+          <Text>{driverInfo?.driverName}</Text>
+          <Text>{driverInfo?.location}</Text>
+        </TouchableOpacity>
       )}
     </KeyboardAvoidingView>
   );
