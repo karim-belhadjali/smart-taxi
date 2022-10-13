@@ -32,7 +32,14 @@ import { GOOGLE_MAPS_API_KEY } from "@env";
 import MapViewDirections from "react-native-maps-directions";
 
 import { functions, httpsCallable, db } from "../firebase";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  query,
+  onSnapshot,
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
 import tw from "twrnc";
 
@@ -51,7 +58,10 @@ const MapHomeScreen = () => {
   const [displaySearchBar, setdisplaySearchBar] = useState(true);
   const [requestSent, setrequestSent] = useState(false);
   const [requestAccepted, setrequestAccepted] = useState(false);
+  const [occupied, setoccupied] = useState(false);
   const [driverInfo, setdriverInfo] = useState("");
+  const [currentDoc, setcurrentDoc] = useState(undefined);
+
   useEffect(() => {
     if (!origin || !destination) return;
 
@@ -62,6 +72,19 @@ const MapHomeScreen = () => {
       });
     }, 300);
   }, [origin, destination]);
+
+  useEffect(() => {
+    if (!origin || !destination) return;
+    setTimeout(() => {
+      mapRef?.current?.fitToSuppliedMarkers(
+        ["origin", "destination", "driver"],
+        {
+          edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
+          duration: 1000,
+        }
+      );
+    }, 300);
+  }, [driverLocation]);
 
   useEffect(() => {
     if (!origin || !destination) return;
@@ -92,20 +115,115 @@ const MapHomeScreen = () => {
   };
 
   useEffect(() => {
-    //if (!requestSent) return;
-    const ref = onSnapshot(doc(db, "Ride Requests", user.uid), (doc) => {
-      if (doc?.data()?.accepted === true) {
-        dispatch(setDriverLocation(doc?.data()?.driverLocation));
-        setsearching(false);
-        setrequestAccepted(true);
-        setdriverInfo({
-          driverName: doc.data().driverId,
-          location: doc.data().driverLocation.description,
-        });
+    if (!requestSent) return;
+    const q = query(collection(db, "Current Ride"));
+    const ref = onSnapshot(q, async (querySnapshot) => {
+      console.log("in Listner");
+      if (!occupied) {
+        console.log("user not occupied");
+        let rideStarted = false;
+        for (let index = 0; index < querySnapshot?.docs?.length; index++) {
+          if (rideStarted) break;
+          const docu = querySnapshot.docs[index].data();
+          if (docu.uid === user.uid) {
+            rideStarted = true;
+            dispatch(setDriverLocation(docu.driver.driverLocation));
+            setoccupied(true);
+            setsearching(false);
+            setdriverInfo({
+              driverName: docu.driver.driverId,
+              location: docu.driver.driverLocation,
+            });
+            ref();
+          }
+        }
+        return;
       }
     });
     return () => ref();
   }, [requestSent]);
+
+  useEffect(() => {
+    if (!occupied && ref) return () => ref();
+    if (!occupied) return;
+    const ref = onSnapshot(doc(db, "Current Ride", user.uid), (doc) => {
+      if (doc.exists()) {
+        if (!currentDoc) {
+          setcurrentDoc(doc);
+        }
+        dispatch(setDriverLocation(doc?.data()?.driver.driverLocation));
+
+        if (doc?.data()?.canceledByDriver) {
+          setoccupied(false);
+          setcurrentDoc(undefined);
+          setrequestAccepted(false);
+          setrequestSent(false);
+          dispatch(setOrigin(undefined));
+          dispatch(setDriverLocation(undefined));
+          dispatch(setDestination(undefined));
+          ref();
+          return;
+        }
+        if (doc?.data()?.finished) {
+          setoccupied(false);
+          setcurrentDoc(undefined);
+          setrequestAccepted(false);
+          setrequestSent(false);
+          dispatch(setOrigin(undefined));
+          dispatch(setDriverLocation(undefined));
+          dispatch(setDestination(undefined));
+          ref();
+        }
+      } else {
+        ref();
+        return;
+      }
+    });
+    return () => ref();
+  }, [occupied]);
+
+  const handleCancelClient = () => {
+    setDoc(
+      doc(db, "Current Ride", currentDoc.data().uid),
+      { canceledByClient: true },
+      { merge: true }
+    ).then(() => {
+      setDoc(
+        doc(
+          db,
+          "Canceled Rides",
+          currentDoc.data().uid +
+            "_" +
+            currentDoc.data().driver.driverId +
+            "_" +
+            Date.now()
+        ),
+        {
+          userUid: user.uid,
+          driverUid: currentDoc.data().driver.driverId,
+          startTime: currentDoc.data().startedAt,
+          FinishedTime: Date.now(),
+          finalPrice: currentDoc.data().price,
+          driverStartingLocation:
+            currentDoc.data().driver.driverstartingLocation,
+          pickUpPlace: currentDoc.data().client.origin,
+          rideDestination: currentDoc.data().client.destination,
+          canceledBy: "client",
+        }
+      ).then((e) => {
+        setoccupied(false);
+        setcurrentDoc(undefined);
+        setrequestAccepted(false);
+        setrequestSent(false);
+        dispatch(setOrigin(undefined));
+        dispatch(setDriverLocation(undefined));
+        dispatch(setDestination(undefined));
+        setTimeout(() => {
+          deleteDoc(doc(db, "Current Ride", user.uid));
+        }, 3000);
+      });
+    });
+  };
 
   return (
     <KeyboardAvoidingView
@@ -206,6 +324,9 @@ const MapHomeScreen = () => {
         mapType="mutedStandard"
         provider="google"
         style={tw`flex-1`}
+        showsMyLocationButton={true}
+        showsUserLocation={true}
+        zoomEnabled={true}
       >
         {origin && destination && (
           <MapViewDirections
@@ -248,9 +369,9 @@ const MapHomeScreen = () => {
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
-            title="current"
+            title="Driver"
             description={driverLocation.description}
-            identifier="current"
+            identifier="driver"
           >
             <Icon size={50} name="location" type="evilicon" color="#8B8000" />
           </Marker>
@@ -323,6 +444,7 @@ const MapHomeScreen = () => {
           <Text>{driverInfo?.location}</Text>
         </TouchableOpacity>
       )}
+      {occupied && <Button title="Cancel ride" onPress={handleCancelClient} />}
     </KeyboardAvoidingView>
   );
 };
