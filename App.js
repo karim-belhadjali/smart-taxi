@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import {
   StyleSheet,
@@ -18,6 +18,7 @@ import tw from "twrnc";
 
 import HomeNavigation from "./components/HomeNavigation";
 import * as Location from "expo-location";
+import * as SplashScreen from "expo-splash-screen";
 
 export default function App() {
   useDeviceContext(tw);
@@ -30,8 +31,6 @@ export default function App() {
         setErrorMsg("Permission to access location was denied");
         return;
       }
-
-      let location = await Location.getCurrentPositionAsync({});
     })();
   }, []);
 

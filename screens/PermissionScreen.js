@@ -6,10 +6,14 @@ import {
   StyleSheet,
   SafeAreaView,
   Button,
+  Dimensions,
+  Image,
+  StatusBar,
 } from "react-native";
 
 import * as Location from "expo-location";
 import * as Network from "expo-network";
+import * as SplashScreen from "expo-splash-screen";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 
 import {
@@ -18,6 +22,8 @@ import {
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+import tw from "twrnc";
+import { useFonts } from "expo-font";
 
 export default function App() {
   const navigation = useNavigation();
@@ -25,7 +31,15 @@ export default function App() {
   const [reload, setreload] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const dispatch = useDispatch();
-  const currentLocation = useSelector(selectCurrentLocation);
+  useFonts({
+    "Poppins-Black": require("../assets/fonts/Poppins/Poppins-Black.ttf"),
+    "Poppins-Italic": require("../assets/fonts/Poppins/Poppins-Italic.ttf"),
+    "Poppins-Regular": require("../assets/fonts/Poppins/Poppins-Regular.ttf"),
+    "Poppins-SemiBold": require("../assets/fonts/Poppins/Poppins-SemiBold.ttf"),
+    "Poppins-Bold": require("../assets/fonts/Poppins/Poppins-Bold.ttf"),
+    "Poppins-Medium": require("../assets/fonts/Poppins/Poppins-Medium.ttf"),
+    "Poppins-Light": require("../assets/fonts/Poppins/Poppins-Light.ttf"),
+  });
 
   useEffect(() => {
     (async () => {
@@ -49,11 +63,19 @@ export default function App() {
                   lat: location.coords.latitude,
                   lng: location.coords.longitude,
                 },
-                description: data.results[0].formatted_address,
+                description: "data.results[0].formatted_address",
               })
             );
             setErrorMsg(null);
             navigation.navigate("LoginScreen");
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: "LoginScreen",
+                },
+              ],
+            });
           })
           .catch((e) => {
             setErrorMsg(e.message);
@@ -68,19 +90,25 @@ export default function App() {
     setreload(!reload);
   };
   return (
-    <SafeAreaView style={{ height: "100%", paddingTop: 50 }}>
-      {!errorMsg && <Text>{JSON.stringify(currentLocation)}</Text>}
-      {errorMsg && (
-        <>
-          <Text>{errorMsg}</Text>
-          <Button title="Try Again" onPress={handleTryAgain} />
-        </>
-      )}
-      <View style={{ position: "absolute", bottom: 0, width: "100%" }}>
-        <Button title="check internet" onPress={handleTryAgain} />
+    <View style={stylesheet.styleRectangle1}>
+      <View
+        style={tw`flex justify-center items-center overflow-visible h-full`}
+      >
+        <Image
+          style={tw`justify-center items-center `}
+          source={require("../assets/png/logoBeem.png")}
+        />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const stylesheet = StyleSheet.create({
+  styleRectangle1: {
+    position: "absolute",
+    left: 0,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height + StatusBar.currentHeight,
+    backgroundColor: "#431879",
+  },
+});
