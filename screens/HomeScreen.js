@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   Image,
@@ -25,6 +25,9 @@ const HomeScreen = () => {
   const h = StatusBar.currentHeight;
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  useEffect(() => {
+    console.log(GOOGLE_MAPS_API_KEY);
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -37,6 +40,17 @@ const HomeScreen = () => {
             style={{ width: 100, height: 100, resizeMode: "contain" }}
             source={{
               uri: "https://links.papareact.com/gzs",
+            }}
+          />
+          <GooglePlacesAutocomplete
+            placeholder="Search"
+            onPress={(data, details = null) => {
+              // 'details' is provided when fetchDetails = true
+              console.log(data, details);
+            }}
+            query={{
+              key: "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg",
+              language: "en",
             }}
           />
           <GooglePlacesAutocomplete

@@ -1,10 +1,8 @@
-import { useNavigation } from "@react-navigation/core";
-import React, { useState, useRef, createRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import {
   Text,
   View,
   TextInput,
-  Button,
   StyleSheet,
   TouchableOpacity,
   Platform,
@@ -24,7 +22,7 @@ import { useDispatch } from "react-redux";
 import { setCurrentUser } from "../app/slices/navigationSlice";
 import tw from "twrnc";
 
-import CodeInput from "../components/CodeInput";
+import { useNavigation } from "@react-navigation/core";
 
 const LoginScreen = () => {
   // Phone Ref management hooks
@@ -443,7 +441,6 @@ const LoginScreen = () => {
                     codeNumber4.length === 1 &&
                     codeNumber5.length === 1
                   ) {
-                    console.log();
                     const credential = PhoneAuthProvider.credential(
                       verificationId,
                       codeNumber1 +
@@ -462,6 +459,14 @@ const LoginScreen = () => {
                       })
                     );
                     navigation.navigate("HomeScreen");
+                    navigation.reset({
+                      index: 0,
+                      routes: [
+                        {
+                          name: "HomeScreen",
+                        },
+                      ],
+                    });
                   } else {
                     showMessage({
                       text: `Error: Pleas fill all the numbers`,
@@ -470,6 +475,7 @@ const LoginScreen = () => {
                   }
                 } catch (err) {
                   showMessage({ text: `Error: ${err.message}`, color: "red" });
+                  console.log(err);
                 }
               }}
             >
@@ -485,50 +491,6 @@ const LoginScreen = () => {
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  inputContainer: {
-    width: "80%",
-  },
-  input: {
-    backgroundColor: "white",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    borderRadius: 10,
-    marginTop: 5,
-  },
-  buttonContainer: {
-    width: "60%",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 40,
-  },
-  button: {
-    backgroundColor: "#0782F9",
-    width: "100%",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  buttonOutline: {
-    backgroundColor: "white",
-    marginTop: 5,
-    borderColor: "#0782F9",
-    borderWidth: 2,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "700",
-    fontSize: 16,
-  },
-  buttonOutlineText: {
-    color: "#0782F9",
-    fontWeight: "700",
-    fontSize: 16,
-  },
   title: {
     fontFamily: "Poppins-SemiBold",
     fontSize: 28,

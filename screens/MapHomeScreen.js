@@ -24,11 +24,12 @@ import {
   setTravelTimeInfo,
   setDriverLocation,
 } from "../app/slices/navigationSlice";
+import AntDesign from "react-native-vector-icons/AntDesign";
+import EvilIcons from "react-native-vector-icons/EvilIcons";
 
 import MapView, { Marker } from "react-native-maps";
 import { Icon } from "react-native-elements";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { GOOGLE_MAPS_API_KEY } from "@env";
 import MapViewDirections from "react-native-maps-directions";
 
 import { functions, httpsCallable, db } from "../firebase";
@@ -42,6 +43,10 @@ import {
 } from "firebase/firestore";
 
 import tw from "twrnc";
+const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
+
+import Svg, { Path } from "react-native-svg";
+import NavFavourites from "../components/NavFavourites";
 
 const MapHomeScreen = () => {
   const dispatch = useDispatch();
@@ -52,6 +57,7 @@ const MapHomeScreen = () => {
   const user = useSelector(selectCurrentUser);
   const mapRef = useRef(null);
 
+  const [currentLocationActive, setcurrentLocationActive] = useState(true);
   const [destinationDispaly, setdestinationDispaly] = useState(false);
   const [destinationText, setdestinationText] = useState("");
   const [searching, setsearching] = useState(false);
@@ -90,9 +96,10 @@ const MapHomeScreen = () => {
     if (!origin || !destination) return;
     setdisplaySearchBar(false);
     const getTravelTime = async () => {
-      const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
+      const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();
+      console.log(data.rows[0].elements[0]);
       dispatch(setTravelTimeInfo(data.rows[0].elements[0]));
     };
 
@@ -227,7 +234,7 @@ const MapHomeScreen = () => {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, paddingTop: StatusBar.currentHeight }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View
@@ -323,9 +330,7 @@ const MapHomeScreen = () => {
         }}
         mapType="mutedStandard"
         provider="google"
-        style={tw`flex-1`}
-        showsMyLocationButton={true}
-        showsUserLocation={true}
+        style={tw`w-screen h-[60%]`}
         zoomEnabled={true}
       >
         {origin && destination && (
@@ -404,6 +409,7 @@ const MapHomeScreen = () => {
           />
         )}
       </MapView>
+
       {origin && destination && (
         <Button title="Search For a ride" onPress={handleSearch} />
       )}
@@ -445,6 +451,24 @@ const MapHomeScreen = () => {
         </TouchableOpacity>
       )}
       {occupied && <Button title="Cancel ride" onPress={handleCancelClient} />}
+      <NavFavourites onSearch={() => console.log("search")} />
+      <TouchableOpacity
+        style={tw`rounded-full absolute w-[11] h-[11] flex justify-center items-center bottom-[42%] right-[5%] bg-[#fff]`}
+      >
+        <Svg
+          width="28"
+          height="28"
+          viewBox="0 0 28 28"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <Path
+            d="M25.1132 15.4C24.8016 17.8674 23.678 20.1609 21.9195 21.9195C20.1609 23.678 17.8674 24.8016 15.4 25.1132V28H12.6V25.1132C10.1326 24.8016 7.83907 23.678 6.08053 21.9195C4.32199 20.1609 3.19842 17.8674 2.8868 15.4H0V12.6H2.8868C3.19842 10.1326 4.32199 7.83907 6.08053 6.08053C7.83907 4.32199 10.1326 3.19842 12.6 2.8868V0H15.4V2.8868C17.8674 3.19842 20.1609 4.32199 21.9195 6.08053C23.678 7.83907 24.8016 10.1326 25.1132 12.6H28V15.4H25.1132ZM14 22.4C16.2278 22.4 18.3644 21.515 19.9397 19.9397C21.515 18.3644 22.4 16.2278 22.4 14C22.4 11.7722 21.515 9.63561 19.9397 8.0603C18.3644 6.485 16.2278 5.6 14 5.6C11.7722 5.6 9.63561 6.485 8.0603 8.0603C6.485 9.63561 5.6 11.7722 5.6 14C5.6 16.2278 6.485 18.3644 8.0603 19.9397C9.63561 21.515 11.7722 22.4 14 22.4ZM14 18.2C15.1139 18.2 16.1822 17.7575 16.9698 16.9698C17.7575 16.1822 18.2 15.1139 18.2 14C18.2 12.8861 17.7575 11.8178 16.9698 11.0302C16.1822 10.2425 15.1139 9.8 14 9.8C12.8861 9.8 11.8178 10.2425 11.0302 11.0302C10.2425 11.8178 9.8 12.8861 9.8 14C9.8 15.1139 10.2425 16.1822 11.0302 16.9698C11.8178 17.7575 12.8861 18.2 14 18.2Z"
+            fill={`${currentLocationActive === true ? "#431879" : "#171717"}`}
+            fill-opacity="0.71"
+          />
+        </Svg>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };

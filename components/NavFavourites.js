@@ -11,66 +11,86 @@ import { Icon } from "react-native-elements";
 import { Point } from "react-native-google-places-autocomplete";
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
-
+import AntDesign from "react-native-vector-icons/AntDesign";
+import EvilIcons from "react-native-vector-icons/EvilIcons";
 import React from "react";
 
-const NavFavourites = ({ shouldSetOrigin }) => {
-  const dispatch = useDispatch();
-  const origin = useSelector(selectOrigin);
-  const navigation = useNavigation();
+const NavFavourites = ({ onSearch, recents }) => {
   return (
-    <FlatList
-      data={favoritesData.filter(
-        // Checks to see if Home or Work is already selected
-        (item) => shouldSetOrigin || origin?.location !== item.location
-      )}
-      keyExtractor={(item) => item.id}
-      ItemSeparatorComponent={() => (
-        <View
-          style={[
-            tw`bg-gray-200`,
-            {
-              height: 0.5,
-            },
-          ]}
-        />
-      )}
-      renderItem={({ item: { name, icon, location, description } }) => (
-        <TouchableOpacity
-          style={tw`flex-row items-center py-5`}
-          onPress={() => {
-            if (shouldSetOrigin) {
-              dispatch(
-                setOrigin({
-                  location,
-                  description,
-                })
-              );
-              navigation.navigate("MapScreen");
-            } else {
-              dispatch(
-                setDestination({
-                  location,
-                  description,
-                })
-              );
-            }
-          }}
+    <View
+      style={[
+        tw`bg-[#FFFFFF] w-screen h-[40%] rounded-t-2xl p-4 flex items-center`,
+        {
+          shadowRadius: 100,
+          shadowOpacity: 0.8,
+          shadowColor: "#171717",
+          shadowOffset: {
+            width: -11,
+            height: -50,
+          },
+          elevation: 50,
+        },
+      ]}
+    >
+      <View style={tw`flex w-90% mt-5 mb-1 items-start`}>
+        <Text style={{ fontFamily: "Poppins-Light" }}>
+          Heureux de vous voir
+        </Text>
+        <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 20 }}>
+          Où aller vous ?
+        </Text>
+      </View>
+      <TouchableOpacity
+        style={[
+          tw`rounded-2xl w-92% bg-white h-13 flex flex-row items-center px-4`,
+          { elevation: 5 },
+        ]}
+        onPress={onSearch}
+      >
+        <AntDesign style={tw` pr-3`} name="search1" size={20} color="#F74C00" />
+        <Text
+          style={[tw`flex-1 mt-1 opacity-50`, { fontFamily: "Poppins-Light" }]}
         >
-          <Icon
-            style={tw`mr-4 rounded-full bg-gray-300 p-3`}
-            name={icon}
-            type="ionicon"
-            color="white"
-            size={18}
-          />
-          <View>
-            <Text style={tw`font-bold text-lg`}>{name}</Text>
-            <Text style={tw`text-gray-500`}>{description}</Text>
-          </View>
-        </TouchableOpacity>
-      )}
-    />
+          Recherche de la destination
+        </Text>
+      </TouchableOpacity>
+      <View style={[tw`flex justify-center w-[90%] items-center mt-2 px-2`]}>
+        <FlatList
+          data={favoritesData}
+          ItemSeparatorComponent={() => (
+            <View
+              style={[
+                tw`bg-gray-200`,
+                {
+                  height: 1,
+                },
+              ]}
+            />
+          )}
+          renderItem={(item) => {
+            return (
+              <View style={tw`flex flex-row my-2 w-screen`}>
+                <EvilIcons
+                  style={tw` pr-3`}
+                  name="clock"
+                  size={40}
+                  color="rgba(171, 171, 171, 0.55)"
+                />
+                <Text
+                  style={[
+                    tw`flex-1 mt-1 opacity-60`,
+                    { fontFamily: "Poppins-Light", fontSize: 18 },
+                  ]}
+                >
+                  {item.item.description}
+                </Text>
+              </View>
+            );
+          }}
+          keyExtractor={(item) => item.name}
+        />
+      </View>
+    </View>
   );
 };
 
@@ -78,17 +98,13 @@ export default NavFavourites;
 
 const favoritesData = [
   {
-    id: "234",
-    icon: "home",
     name: "Home",
     location: { lat: 5.4945, lng: -0.4118 },
-    description: "Jordan Gospel Centre, Land of Grace",
+    description: "Ezzahra",
   },
   {
-    id: "567",
-    icon: "briefcase",
     name: "Work",
     location: { lat: 5.5497, lng: -0.3522 },
-    description: "Finger Bites Kitchen, Mile 11",
+    description: "Rades",
   },
 ];
