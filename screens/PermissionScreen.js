@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import { useFonts } from "expo-font";
+import LogoSvg from "../assets/svg/LogoSvg";
 
 export default function App() {
   const navigation = useNavigation();
@@ -94,10 +95,7 @@ export default function App() {
       <View
         style={tw`flex justify-center items-center overflow-visible h-full`}
       >
-        <Image
-          style={tw`justify-center items-center `}
-          source={require("../assets/png/logoBeem.png")}
-        />
+        <LogoSvg style={tw`justify-center items-center `} />
       </View>
     </View>
   );

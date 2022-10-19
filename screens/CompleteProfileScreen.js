@@ -131,7 +131,7 @@ const CompleteProfileScreen = () => {
       </TouchableOpacity>
       {currentStep === "step1" && (
         <>
-          <View style={[styles.styleSEnregistrer, tw`mb-15`]}>
+          <View style={[styles.styleSEnregistrer, tw`mb-9`]}>
             <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 30 }}>
               S'enregistrer
             </Text>
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     left: -33,
     top: -126,
     backgroundColor: "#431879B8",
-    opacity: 0.72,
+    opacity: 0.9,
     width: 283,
     height: 283,
   },

@@ -9,6 +9,7 @@ import {
   Platform,
   Button,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
 import {
   selectDestination,
@@ -25,10 +26,10 @@ import {
   setDriverLocation,
 } from "../app/slices/navigationSlice";
 import AntDesign from "react-native-vector-icons/AntDesign";
-import EvilIcons from "react-native-vector-icons/EvilIcons";
+import Entypo from "react-native-vector-icons/Entypo";
 
 import MapView, { Marker } from "react-native-maps";
-import { Icon } from "react-native-elements";
+
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapViewDirections from "react-native-maps-directions";
 
@@ -48,7 +49,21 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
 import Svg, { Path } from "react-native-svg";
 import NavFavourites from "../components/NavFavourites";
 
+import SearchPage from "../components/SearchPage";
+import HomeMap from "../components/HomeMap";
+import SearchRide from "../components/Rides/SearchRide";
+import ConfirmRide from "../components/Rides/ConfirmRide";
+import WaitingRide from "../components/Rides/WaitingRide";
+import OngoingRide from "../components/Rides/OngoingRide";
+import FinishedPage from "../components/FinishedPage";
+import { useNavigation } from "@react-navigation/core";
+import MainDrawer from "../components/MainDrawer";
+// {"status": "NOT_FOUND"}
+//  LOG  {"distance": {"text": "84.7 km", "value": 84667}, "duration": {"text": "1 hour 26 mins", "value": 5139}, "status": "OK"}
+
 const MapHomeScreen = () => {
+  const navigation = useNavigation();
+
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
@@ -60,6 +75,7 @@ const MapHomeScreen = () => {
   const [currentLocationActive, setcurrentLocationActive] = useState(true);
   const [destinationDispaly, setdestinationDispaly] = useState(false);
   const [destinationText, setdestinationText] = useState("");
+  const [originText, setoriginText] = useState();
   const [searching, setsearching] = useState(false);
   const [displaySearchBar, setdisplaySearchBar] = useState(true);
   const [requestSent, setrequestSent] = useState(false);
@@ -67,10 +83,13 @@ const MapHomeScreen = () => {
   const [occupied, setoccupied] = useState(false);
   const [driverInfo, setdriverInfo] = useState("");
   const [currentDoc, setcurrentDoc] = useState(undefined);
+  const [currentStep, setcurrentStep] = useState("home");
+  const [substep, setsubstep] = useState("search");
+  const [mapHeight, setmapHeight] = useState("60%");
+  const [displayMenu, setdisplayMenu] = useState("false");
 
   useEffect(() => {
-    if (!origin || !destination) return;
-
+    if (!origin || !destination || currentStep !== "confirm") return;
     setTimeout(() => {
       mapRef?.current?.fitToSuppliedMarkers(["origin", "destination"], {
         edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
@@ -78,6 +97,24 @@ const MapHomeScreen = () => {
       });
     }, 300);
   }, [origin, destination]);
+
+  useEffect(() => {
+    if (!origin || !destination || currentStep !== "confirm") return;
+    setTimeout(() => {
+      mapRef?.current?.fitToSuppliedMarkers(["origin", "destination"], {
+        edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
+        duration: 1000,
+      });
+    }, 300);
+  }, [currentStep]);
+
+  useEffect(() => {
+    if (substep !== "search") {
+      setmapHeight("65%");
+    } else {
+      setmapHeight("60%");
+    }
+  }, [substep]);
 
   useEffect(() => {
     if (!origin || !destination) return;
@@ -99,7 +136,6 @@ const MapHomeScreen = () => {
       const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();
-      console.log(data.rows[0].elements[0]);
       dispatch(setTravelTimeInfo(data.rows[0].elements[0]));
     };
 
@@ -237,178 +273,168 @@ const MapHomeScreen = () => {
       style={{ flex: 1, paddingTop: StatusBar.currentHeight }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View
-        style={[
-          tw`absolute top-15 bg-transparent left-4 z-50 flex flex-row px-3`,
-        ]}
-      >
-        <TouchableOpacity
-          onPress={() => setdisplaySearchBar(!displaySearchBar)}
-          style={tw`bg-gray-50 p-3 mt-1 w-12 h-12 rounded-full shadow-lg mr-3`}
+      {currentStep !== "confirm" && currentStep !== "finished" && (
+        <View
+          style={[
+            tw`absolute top-15 bg-transparent left-4 z-50 flex flex-row px-3`,
+          ]}
         >
-          <Icon name="menu" />
-        </TouchableOpacity>
-        {displaySearchBar && (
-          <View style={tw`m-2 w-60`} focusable={true}>
-            <GooglePlacesAutocomplete
-              placeholder="From where?"
-              autoFillOnNotFound={true}
-              debounce={400}
-              fetchDetails={true}
-              enablePoweredByContainer={false}
-              nearbyPlacesAPI="GooglePlacesSearch"
-              query={{
-                key: GOOGLE_MAPS_API_KEY,
-                language: "en",
-                components: "country:tn",
-              }}
-              textInputProps={{
-                onChange: () => setdestinationDispaly(false),
-              }}
-              isRowScrollable={true}
-              onPress={(data, details = null) => {
-                dispatch(
-                  setOrigin({
-                    location: details?.geometry.location,
-                    description: data.description,
-                  })
-                );
-                mapRef.current.animateToRegion(
-                  {
-                    latitude: details?.geometry.location.lat,
-                    longitude: details?.geometry.location.lng,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
-                  },
-                  1000
-                );
-                setdestinationDispaly(true);
-              }}
-            />
+          <TouchableOpacity
+            onPress={() => navigation.navigate("MainDrawer")}
+            style={tw`bg-gray-50 p-3 mt-1 w-12 h-12 rounded-full shadow-lg mr-3`}
+          >
+            <Entypo name="menu" size={25} />
+          </TouchableOpacity>
+        </View>
+      )}
 
-            {destinationDispaly && (
-              <GooglePlacesAutocomplete
-                placeholder="Where to?"
-                debounce={400}
-                fetchDetails={true}
-                enablePoweredByContainer={false}
-                nearbyPlacesAPI="GooglePlacesSearch"
-                query={{
-                  key: GOOGLE_MAPS_API_KEY,
-                  language: "en",
-                  components: "country:tn",
-                }}
-                textInputProps={{
-                  value: destinationText,
-                  onChange: (e) => {
-                    setdestinationText(e.target.value);
-                  },
-                }}
-                onPress={(data, details = null) => {
-                  dispatch(
-                    setDestination({
-                      location: details?.geometry.location,
-                      description: data.description,
-                    })
-                  );
-                  setdestinationText(data.description);
-                  // navigation.navigate("RideOptionsCard");
-                }}
-              />
-            )}
-          </View>
-        )}
-      </View>
-
-      <MapView
-        ref={mapRef}
-        initialRegion={{
-          latitude: currentLocation.location.lat,
-          longitude: currentLocation.location.lng,
-          latitudeDelta: 0.005,
-          longitudeDelta: 0.005,
-        }}
-        mapType="mutedStandard"
-        provider="google"
-        style={tw`w-screen h-[60%]`}
-        zoomEnabled={true}
-      >
-        {origin && destination && (
-          <MapViewDirections
-            origin={`${origin.location.lat},${origin.location.lng}`}
-            destination={destination.description}
-            apikey={GOOGLE_MAPS_API_KEY}
-            strokeWidth={3}
-            strokeColor="blue"
-            lineDashPattern={[0]}
-          />
-        )}
-        {origin && driverLocation && (
-          <MapViewDirections
-            origin={`${origin.location.lat},${origin.location.lng}`}
-            destination={`${driverLocation.location.lat},${driverLocation.location.lng}`}
-            apikey={GOOGLE_MAPS_API_KEY}
-            strokeWidth={3}
-            strokeColor="red"
-            lineDashPattern={[0]}
-          />
-        )}
-        {!origin && (
-          <Marker
-            coordinate={{
+      {currentStep == "home" && (
+        <HomeMap
+          handleStep={setcurrentStep}
+          currentLocation={currentLocation}
+          currentLocationActive={currentLocationActive}
+        />
+      )}
+      {currentStep == "search" && (
+        <SearchPage
+          handleback={() => setcurrentStep("confirm")}
+          handledestination={setdestinationText}
+          destinationText={destinationText}
+          originText={originText}
+          handleOrigin={setoriginText}
+        />
+      )}
+      {currentStep == "confirm" && (
+        <>
+          <MapView
+            ref={mapRef}
+            initialRegion={{
               latitude: currentLocation.location.lat,
               longitude: currentLocation.location.lng,
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
-            title="current"
-            description={currentLocation.description}
-            identifier="current"
-          />
-        )}
-        {driverLocation && (
-          <Marker
-            coordinate={{
-              latitude: driverLocation.location.lat,
-              longitude: driverLocation.location.lng,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
-            }}
-            title="Driver"
-            description={driverLocation.description}
-            identifier="driver"
+            mapType="mutedStandard"
+            provider="google"
+            style={tw`w-screen h-[${mapHeight}]`}
+            zoomEnabled={true}
           >
-            <Icon size={50} name="location" type="evilicon" color="#8B8000" />
-          </Marker>
-        )}
-        {origin?.location && (
-          <Marker
-            coordinate={{
-              latitude: origin.location.lat,
-              longitude: origin.location.lng,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
-            }}
-            title="Origin"
-            description={origin.description}
-            identifier="origin"
-          />
-        )}
+            {origin && destination && (
+              <MapViewDirections
+                origin={`${origin.location.lat},${origin.location.lng}`}
+                destination={destination.description}
+                apikey={GOOGLE_MAPS_API_KEY}
+                strokeWidth={3}
+                strokeColor="blue"
+                lineDashPattern={[0]}
+              />
+            )}
+            {origin && driverLocation && (
+              <MapViewDirections
+                origin={`${origin.location.lat},${origin.location.lng}`}
+                destination={`${driverLocation.location.lat},${driverLocation.location.lng}`}
+                apikey={GOOGLE_MAPS_API_KEY}
+                strokeWidth={3}
+                strokeColor="red"
+                lineDashPattern={[0]}
+              />
+            )}
+            {!origin && (
+              <Marker
+                coordinate={{
+                  latitude: currentLocation.location.lat,
+                  longitude: currentLocation.location.lng,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}
+                title="current"
+                description={currentLocation.description}
+                identifier="current"
+              />
+            )}
+            {driverLocation && (
+              <Marker
+                coordinate={{
+                  latitude: driverLocation.location.lat,
+                  longitude: driverLocation.location.lng,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}
+                title="Driver"
+                description={driverLocation.description}
+                identifier="driver"
+              >
+                <Icon
+                  size={50}
+                  name="location"
+                  type="evilicon"
+                  color="#8B8000"
+                />
+              </Marker>
+            )}
+            {origin?.location && (
+              <Marker
+                coordinate={{
+                  latitude: origin.location.lat,
+                  longitude: origin.location.lng,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}
+                title="Origin"
+                description={origin.description}
+                identifier="origin"
+              />
+            )}
 
-        {destination?.location && (
-          <Marker
-            coordinate={{
-              latitude: destination.location.lat,
-              longitude: destination.location.lng,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005,
-            }}
-            title="Destination"
-            description={destination.description}
-            identifier="destination"
-          />
-        )}
-      </MapView>
+            {destination?.location && (
+              <Marker
+                coordinate={{
+                  latitude: destination.location.lat,
+                  longitude: destination.location.lng,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}
+                title="Destination"
+                description={destination.description}
+                identifier="destination"
+              />
+            )}
+          </MapView>
+          {substep === "search" && (
+            <SearchRide onClick={() => setsubstep("confirm")} />
+          )}
+          {substep === "confirm" && (
+            <ConfirmRide
+              onCancel={() => {
+                setcurrentStep("home");
+                setsubstep("search");
+              }}
+              onConfirm={() => {
+                setsubstep("waiting");
+              }}
+            />
+          )}
+          {substep === "waiting" && (
+            <WaitingRide onCall={() => setsubstep("onGoing")} />
+          )}
+          {substep === "onGoing" && (
+            <OngoingRide
+              onNext={() => {
+                setcurrentStep("finished");
+                setsubstep("search");
+              }}
+            />
+          )}
+        </>
+      )}
+      {currentStep == "finished" && (
+        <FinishedPage
+          OnFinish={() => {
+            setcurrentStep("home");
+            setsubstep("search");
+          }}
+        />
+      )}
 
       {origin && destination && (
         <Button title="Search For a ride" onPress={handleSearch} />
@@ -451,24 +477,6 @@ const MapHomeScreen = () => {
         </TouchableOpacity>
       )}
       {occupied && <Button title="Cancel ride" onPress={handleCancelClient} />}
-      <NavFavourites onSearch={() => console.log("search")} />
-      <TouchableOpacity
-        style={tw`rounded-full absolute w-[11] h-[11] flex justify-center items-center bottom-[42%] right-[5%] bg-[#fff]`}
-      >
-        <Svg
-          width="28"
-          height="28"
-          viewBox="0 0 28 28"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <Path
-            d="M25.1132 15.4C24.8016 17.8674 23.678 20.1609 21.9195 21.9195C20.1609 23.678 17.8674 24.8016 15.4 25.1132V28H12.6V25.1132C10.1326 24.8016 7.83907 23.678 6.08053 21.9195C4.32199 20.1609 3.19842 17.8674 2.8868 15.4H0V12.6H2.8868C3.19842 10.1326 4.32199 7.83907 6.08053 6.08053C7.83907 4.32199 10.1326 3.19842 12.6 2.8868V0H15.4V2.8868C17.8674 3.19842 20.1609 4.32199 21.9195 6.08053C23.678 7.83907 24.8016 10.1326 25.1132 12.6H28V15.4H25.1132ZM14 22.4C16.2278 22.4 18.3644 21.515 19.9397 19.9397C21.515 18.3644 22.4 16.2278 22.4 14C22.4 11.7722 21.515 9.63561 19.9397 8.0603C18.3644 6.485 16.2278 5.6 14 5.6C11.7722 5.6 9.63561 6.485 8.0603 8.0603C6.485 9.63561 5.6 11.7722 5.6 14C5.6 16.2278 6.485 18.3644 8.0603 19.9397C9.63561 21.515 11.7722 22.4 14 22.4ZM14 18.2C15.1139 18.2 16.1822 17.7575 16.9698 16.9698C17.7575 16.1822 18.2 15.1139 18.2 14C18.2 12.8861 17.7575 11.8178 16.9698 11.0302C16.1822 10.2425 15.1139 9.8 14 9.8C12.8861 9.8 11.8178 10.2425 11.0302 11.0302C10.2425 11.8178 9.8 12.8861 9.8 14C9.8 15.1139 10.2425 16.1822 11.0302 16.9698C11.8178 17.7575 12.8861 18.2 14 18.2Z"
-            fill={`${currentLocationActive === true ? "#431879" : "#171717"}`}
-            fill-opacity="0.71"
-          />
-        </Svg>
-      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };
@@ -476,3 +484,53 @@ const MapHomeScreen = () => {
 export default MapHomeScreen;
 
 const styles = StyleSheet.create({});
+const toInputBoxStyle2 = StyleSheet.create({
+  container: {
+    backgroundColor: "#CAC8C8",
+    flex: 0,
+    opacity: 0.5,
+    borderRadius: 5,
+    marginTop: 5,
+  },
+  textInput: {
+    backgroundColor: "transparent",
+    fontSize: 15,
+    paddingTop: 10,
+    height: 35,
+    opacity: 1,
+  },
+  textInputContainer: {
+    paddingBottom: 0,
+  },
+});
+const toInputBoxStyles = StyleSheet.create({
+  container: {
+    backgroundColor: "#CAC8C8",
+    flex: 0,
+    opacity: 0.5,
+    borderRadius: 5,
+  },
+  textInput: {
+    backgroundColor: "transparent",
+    fontSize: 15,
+    paddingTop: 10,
+    height: 35,
+    opacity: 1,
+  },
+  textInputContainer: {
+    paddingBottom: 0,
+  },
+});
+
+const favoritesData = [
+  {
+    name: "Home",
+    location: { lat: 20.4945, lng: -0.4118 },
+    description: "Ezzahra",
+  },
+  {
+    name: "Work",
+    location: { lat: 5.5497, lng: -0.3522 },
+    description: "Rades",
+  },
+];

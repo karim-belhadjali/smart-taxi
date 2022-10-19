@@ -10,7 +10,6 @@ import React, { useState } from "react";
 
 import Intl from "intl";
 
-import { Icon } from "react-native-elements";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { selectTravelTimeInfo } from "../app/slices/navigationSlice";
 import tw from "twrnc";
@@ -27,12 +26,7 @@ const RideOptionsCard = () => {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={tw`absolute top-1 left-0 px-5 rounded-full`}
-        >
-          <Icon
-            name={Platform.OS === "ios" ? "ios-chevron-back" : "md-arrow-back"}
-            type="ionicon"
-          />
-        </TouchableOpacity>
+        ></TouchableOpacity>
         <Text style={tw`text-center mb-5 text-lg`}>
           Select a Ride - {travelTimeInformation?.distance.text}
         </Text>

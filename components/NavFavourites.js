@@ -1,21 +1,16 @@
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
-import {
-  selectOrigin,
-  setDestination,
-  setOrigin,
-} from "../app/slices/navigationSlice";
-import { useDispatch, useSelector } from "react-redux";
 
-import { HomeScreenProp } from "./NavOptions";
-import { Icon } from "react-native-elements";
-import { Point } from "react-native-google-places-autocomplete";
-import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import EvilIcons from "react-native-vector-icons/EvilIcons";
 import React from "react";
 
+import { useDispatch } from "react-redux";
+import { setDestination } from "../app/slices/navigationSlice";
+
 const NavFavourites = ({ onSearch, recents }) => {
+  const dispatch = useDispatch();
+
   return (
     <View
       style={[
@@ -69,7 +64,17 @@ const NavFavourites = ({ onSearch, recents }) => {
           )}
           renderItem={(item) => {
             return (
-              <View style={tw`flex flex-row my-2 w-screen`}>
+              <TouchableOpacity
+                style={tw`flex flex-row my-2 w-screen`}
+                onPress={() =>
+                  dispatch(
+                    setDestination({
+                      location: item.item.location,
+                      description: item.item.description,
+                    })
+                  )
+                }
+              >
                 <EvilIcons
                   style={tw` pr-3`}
                   name="clock"
@@ -84,7 +89,7 @@ const NavFavourites = ({ onSearch, recents }) => {
                 >
                   {item.item.description}
                 </Text>
-              </View>
+              </TouchableOpacity>
             );
           }}
           keyExtractor={(item) => item.name}
@@ -99,7 +104,7 @@ export default NavFavourites;
 const favoritesData = [
   {
     name: "Home",
-    location: { lat: 5.4945, lng: -0.4118 },
+    location: { lat: 20.4945, lng: -0.4118 },
     description: "Ezzahra",
   },
   {

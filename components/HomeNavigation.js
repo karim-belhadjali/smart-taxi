@@ -1,11 +1,11 @@
-import HomeScreen from "../screens/HomeScreen";
-import MapScreen from "../screens/MapScreen";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen";
 import App from "../screens/PermissionScreen";
 import MapHomeScreen from "../screens/MapHomeScreen";
 import CompleteProfileScreen from "../screens/CompleteProfileScreen";
+import AboutScreen from "../screens/AboutScreen";
+import MainDrawer from "./MainDrawer";
 
 const Stack = createNativeStackNavigator();
 
@@ -36,6 +36,20 @@ const HomeNavigation = () => {
       <Stack.Screen
         name="CompleteProfileScreen"
         component={CompleteProfileScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AboutScreen"
+        component={AboutScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="MainDrawer"
+        component={MainDrawer}
         options={{
           headerShown: false,
         }}

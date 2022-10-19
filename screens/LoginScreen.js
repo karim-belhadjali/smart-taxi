@@ -16,13 +16,13 @@ import {
   FirebaseRecaptchaBanner,
 } from "expo-firebase-recaptcha";
 import { auth, app, functions, httpsCallable } from "../firebase";
-import { Icon } from "react-native-elements";
 
 import { useDispatch } from "react-redux";
 import { setCurrentUser } from "../app/slices/navigationSlice";
 import tw from "twrnc";
 
 import { useNavigation } from "@react-navigation/core";
+import TunisiaSvg from "../assets/svg/TunisiaSvg";
 
 const LoginScreen = () => {
   // Phone Ref management hooks
@@ -198,10 +198,7 @@ const LoginScreen = () => {
             ]}
           >
             <View style={tw`flex-row`}>
-              <Image
-                source={require("../assets/png/tunisia.png")}
-                style={tw`mt-[5]`}
-              />
+              <TunisiaSvg style={tw`mt-[5]`} />
               <Text style={styles.number}>+216</Text>
             </View>
             <View style={tw`h-full border-[0.15] mx-6 `} />
