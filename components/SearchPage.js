@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  KeyboardAvoidingView,
 } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import DestinationSvg from "../assets/svg/destinationSvg";
@@ -30,16 +31,16 @@ const SearchPage = ({
   handledestination,
   originText,
   handleOrigin,
+  handleSearch,
 }) => {
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
-  const currentLocation = useSelector(selectCurrentLocation);
-  const user = useSelector(selectCurrentUser);
+
   return (
-    <View
+    <KeyboardAvoidingView
       style={[
-        tw`flex items-center w-screen h-screen bg-[#E5E5E5]`,
+        tw`flex flex-1 items-center w-screen h-screen bg-[#E5E5E5]`,
         { zIndex: 100 },
       ]}
     >
@@ -54,7 +55,7 @@ const SearchPage = ({
         </TouchableOpacity>
         <Text
           style={[
-            tw`mt-1 flex-1 ml-2`,
+            tw` flex-1 ml-2`,
             {
               fontFamily: "Poppins-SemiBold",
               letterSpacing: 0.3,
@@ -246,7 +247,35 @@ const SearchPage = ({
           keyExtractor={(item) => item.name}
         />
       </View>
-    </View>
+
+      {/* {origin && destination && ( */}
+      <TouchableOpacity
+        style={tw`absolute w-screen flex items-center justify-center bottom-2`}
+        onPress={() => {
+          handleSearch();
+        }}
+      >
+        <View
+          key={"separator"}
+          style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-screen`}
+        />
+        <View style={tw`flex flex-row justify-center items-center`}>
+          <AntDesign
+            style={tw` pr-3`}
+            name="search1"
+            size={20}
+            color="#000000"
+          />
+
+          <Text
+            style={[tw`mt-1`, { fontFamily: "Poppins-Regular", fontSize: 18 }]}
+          >
+            Rechercher
+          </Text>
+        </View>
+      </TouchableOpacity>
+      {/* )} */}
+    </KeyboardAvoidingView>
   );
 };
 

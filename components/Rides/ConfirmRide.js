@@ -3,7 +3,7 @@ import React from "react";
 import tw from "twrnc";
 import CarSvg from "../../assets/svg/CarSvg";
 
-const ConfirmRide = ({ onCancel, onConfirm }) => {
+const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
   return (
     <View
       style={[
@@ -25,8 +25,9 @@ const ConfirmRide = ({ onCancel, onConfirm }) => {
           tw`mt-1 pr-10`,
           { fontFamily: "Poppins-Regular", fontSize: 15 },
         ]}
+        numberOfLines={1}
       >
-        Rendez-vous a Avenue Mohamed V
+        Rendez-vous a {rideInfo?.place}
       </Text>
       <View
         key={"separator"}
@@ -40,14 +41,16 @@ const ConfirmRide = ({ onCancel, onConfirm }) => {
           <Text
             style={[tw``, { fontFamily: "Poppins-SemiBold", fontSize: 20 }]}
           >
-            Karim
+            {rideInfo?.driverName}
           </Text>
           <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
-            Arrive dans 3 min
+            Arrive dans {rideInfo?.time} min
           </Text>
-          <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
-            10,560 TND
-          </Text>
+          {!isNaN(rideInfo?.price) && (
+            <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
+              {rideInfo?.price} TND
+            </Text>
+          )}
         </View>
       </View>
       <View style={tw`mt-2 w-screen flex flex-row justify-evenly items-center`}>

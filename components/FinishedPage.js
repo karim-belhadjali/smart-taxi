@@ -11,7 +11,7 @@ import DestinationSvgBig from "../assets/svg/destinationSvgBig";
 import FinalCarSvg from "../assets/svg/FinalCarSvg";
 import StarSvg from "../assets/svg/StarSvg";
 
-const FinishedPage = ({ OnFinish }) => {
+const FinishedPage = ({ ride, OnFinish }) => {
   return (
     <View
       style={tw`flex justify-around items-center w-screen h-screen  pt-[${
@@ -30,12 +30,12 @@ const FinishedPage = ({ OnFinish }) => {
                 { fontFamily: "Poppins-Regular", fontSize: 18 },
               ]}
             >
-              Avenue Mohamed V , Tunis
+              {ride?.origin.description}
             </Text>
             <Text
               style={[tw`mb-1`, { fontFamily: "Poppins-Bold", fontSize: 18 }]}
             >
-              Lake of Tunis
+              {ride?.destination.description}
             </Text>
           </View>
         </View>
@@ -48,7 +48,7 @@ const FinishedPage = ({ OnFinish }) => {
       <FinalCarSvg style={tw`mr-8`} />
       <View style={tw`flex items-center `}>
         <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 30 }]}>
-          10,560 TND
+          {ride?.price} TND
         </Text>
         <Text
           style={[

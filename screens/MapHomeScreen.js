@@ -24,16 +24,18 @@ import {
   setOrigin,
   setTravelTimeInfo,
   setDriverLocation,
+  selectTravelTimeInfo,
 } from "../app/slices/navigationSlice";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
+import EvilIcons from "react-native-vector-icons/EvilIcons";
 
 import MapView, { Marker } from "react-native-maps";
 
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapViewDirections from "react-native-maps-directions";
 
-import { functions, httpsCallable, db } from "../firebase";
+import { auth, functions, httpsCallable, db } from "../firebase";
 import {
   query,
   onSnapshot,
@@ -42,6 +44,7 @@ import {
   setDoc,
   deleteDoc,
 } from "firebase/firestore";
+import { LogBox } from "react-native";
 
 import tw from "twrnc";
 const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
@@ -58,19 +61,30 @@ import OngoingRide from "../components/Rides/OngoingRide";
 import FinishedPage from "../components/FinishedPage";
 import { useNavigation } from "@react-navigation/core";
 import MainDrawer from "../components/MainDrawer";
+import { set } from "react-native-reanimated";
 // {"status": "NOT_FOUND"}
 //  LOG  {"distance": {"text": "84.7 km", "value": 84667}, "duration": {"text": "1 hour 26 mins", "value": 5139}, "status": "OK"}
 
 const MapHomeScreen = () => {
   const navigation = useNavigation();
+  LogBox.ignoreLogs([
+    "TypeError: undefined is not an object (evaluating 'request.driverInfo.name')",
+  ]);
 
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
   const currentLocation = useSelector(selectCurrentLocation);
+  const travelTimeInfo = useSelector(selectTravelTimeInfo);
   const driverLocation = useSelector(selectDriverLocation);
   const user = useSelector(selectCurrentUser);
   const mapRef = useRef(null);
+
+  const [requestDriverInfo, setrequestDriverInfo] = useState(null);
+  const [currentRequest, setcurrentRequest] = useState(null);
+  const [price, setprice] = useState(0);
+
+  const [currentRide, setcurrentRide] = useState(null);
 
   const [currentLocationActive, setcurrentLocationActive] = useState(true);
   const [destinationDispaly, setdestinationDispaly] = useState(false);
@@ -90,12 +104,14 @@ const MapHomeScreen = () => {
 
   useEffect(() => {
     if (!origin || !destination || currentStep !== "confirm") return;
-    setTimeout(() => {
-      mapRef?.current?.fitToSuppliedMarkers(["origin", "destination"], {
-        edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
-        duration: 1000,
-      });
-    }, 300);
+    if (!driverLocation) {
+      setTimeout(() => {
+        mapRef?.current?.fitToSuppliedMarkers(["origin", "destination"], {
+          edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
+          duration: 1000,
+        });
+      }, 300);
+    }
   }, [origin, destination]);
 
   useEffect(() => {
@@ -131,7 +147,6 @@ const MapHomeScreen = () => {
 
   useEffect(() => {
     if (!origin || !destination) return;
-    setdisplaySearchBar(false);
     const getTravelTime = async () => {
       const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
@@ -141,21 +156,6 @@ const MapHomeScreen = () => {
 
     getTravelTime();
   }, [origin, destination, GOOGLE_MAPS_API_KEY]);
-
-  const handleSearch = () => {
-    setsearching(true);
-    const createRideRequest = httpsCallable(functions, "createRideRequest");
-    createRideRequest({
-      uid: user.uid,
-      phoneNumber: user.phoneNumber,
-      origin: origin,
-      destination: destination,
-    })
-      .then((e) => {
-        setrequestSent(true);
-      })
-      .catch((error) => {});
-  };
 
   useEffect(() => {
     if (!requestSent) return;
@@ -261,11 +261,231 @@ const MapHomeScreen = () => {
         dispatch(setOrigin(undefined));
         dispatch(setDriverLocation(undefined));
         dispatch(setDestination(undefined));
-        setTimeout(() => {
-          deleteDoc(doc(db, "Current Ride", user.uid));
-        }, 3000);
+        // setTimeout(() => {
+        //   deleteDoc(doc(db, "Current Ride", user.uid));
+        // }, 3000);
       });
     });
+  };
+  const handleSearch = () => {
+    if (travelTimeInfo !== null && travelTimeInfo?.status !== "NOT_FOUND") {
+      let distance = parseFloat(travelTimeInfo.distance.text);
+      let duration = travelTimeInfo.duration.text;
+      setsubstep("search");
+      setDoc(
+        doc(db, "Ride Requests", auth.currentUser.uid),
+        {
+          driverAccepted: false,
+          clientAccepted: false,
+          user: user,
+          origin: origin,
+          destination: destination,
+          clientDistance: distance,
+          canceled: false,
+          duration,
+        },
+        { merge: true }
+      )
+        .then(() => {
+          setcurrentStep("confirm");
+          handleSearchForDriver(false);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      console.log(travelTimeInfo);
+    }
+  };
+
+  const handleSearchForDriver = (del) => {
+    if (!del) {
+      const unsub = onSnapshot(
+        doc(db, "Ride Requests", auth.currentUser.uid),
+        async (current) => {
+          if (current.exists()) {
+            const request = current.data();
+            if (request.driverAccepted && request.clientAccepted == false) {
+              let prices = await calculatePrice(
+                request.clientDistance,
+                request.driverDistance
+              );
+              setprice(prices);
+              setrequestDriverInfo({
+                place: request?.origin?.description,
+                driverName: request?.driverInfo?.name,
+                time: request?.driverTime,
+                price: prices,
+              });
+              setcurrentRequest(request);
+              setsubstep("confirm");
+              unsub();
+            } else if (
+              request.driverAccepted &&
+              request.clientAccepted == true
+            ) {
+              unsub();
+            }
+          } else {
+            unsub();
+          }
+        }
+      );
+    } else {
+      //deleteDoc(doc(db, "Ride Requests", auth.currentUser.uid));
+      setcurrentStep("home");
+      dispatch(setOrigin(null));
+      dispatch(setDestination(null));
+      setdestinationText("");
+      setoriginText("");
+    }
+  };
+
+  const handleConfirmCancelRequest = (confirm) => {
+    if (confirm) {
+      setDoc(
+        doc(db, "Ride Requests", auth.currentUser.uid),
+        {
+          clientAccepted: true,
+        },
+        { merge: true }
+      )
+        .then(async () => {
+          console.log("in confirmation");
+          let newRide = {
+            canceledByDriver: false,
+            canceledByClient: false,
+            driverArrived: false,
+            driverTime: currentRequest.driverTime,
+            duration: currentRequest.duration,
+            user: user,
+            origin: origin,
+            destination: destination,
+            driverInfo: currentRequest.driverInfo,
+            price: price,
+            clientDistance: currentRequest.clientDistance,
+            canceled: false,
+            driveStarted: false,
+            finished: false,
+          };
+          dispatch(setDriverLocation(currentRequest?.driverInfo?.location));
+          setDoc(doc(db, "Current Rides", auth.currentUser.uid), newRide, {
+            merge: true,
+          })
+            .then(() => {
+              console.log("confirmation success");
+              setcurrentRide(newRide);
+              setcurrentStep("confirm");
+              setsubstep("waiting");
+              setcurrentRequest(null);
+              handleSearchForDriver(false);
+              handleWaitForDriver(false);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      setDoc(
+        doc(db, "Ride Requests", auth.currentUser.uid),
+        {
+          canceled: true,
+        },
+        { merge: true }
+      )
+        .then(async () => {
+          setrequestDriverInfo(null);
+          setcurrentRequest(null);
+          setcurrentStep("home");
+          setsubstep("seach");
+          dispatch(setDestination(null));
+          dispatch(setOrigin(null));
+          setdestinationText("");
+          setoriginText("");
+          // setTimeout(() => {
+          //   deleteDoc(doc(db, "Ride Requests", auth.currentUser.uid));
+          // }, 3000);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  };
+
+  const handleWaitForDriver = (del) => {
+    const unsub = onSnapshot(
+      doc(db, "Current Rides", auth.currentUser.uid),
+      async (current) => {
+        const request = current.data();
+        console.log(request);
+        if (!request.finished) {
+          dispatch(setDriverLocation(request?.driverInfo?.location));
+        }
+        if (request.driverArrived && request.driveStarted === false) {
+          setDoc(
+            doc(db, "Current Rides", auth.currentUser.uid),
+            { driveStarted: true },
+            {
+              merge: true,
+            }
+          )
+            .then(() => {
+              setcurrentRide(request);
+              setsubstep("onGoing");
+              dispatch(setOrigin(null));
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        } else if (request.finished) {
+          setcurrentStep("finished");
+          setsubstep("search");
+          dispatch(setDriverLocation(null));
+          dispatch(setDestination(null));
+          unsub();
+        }
+      }
+    );
+  };
+
+  const calculatePrice = async (distanceClient, distanceDriver) => {
+    var hour = new Date().getHours();
+    let startcounter;
+    const nightyHours = [21, 22, 23, 0, 1, 2, 3, 4, 5];
+    const busyHours = [7, 8, 17, 18];
+    const lessBusyHours = [9, 10, 16, 19];
+    let price = 0;
+
+    if (nightyHours.includes(hour)) {
+      startcounter = 1.5;
+      price = (
+        startcounter +
+        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1.5
+      ).toFixed(3);
+    } else if (busyHours.includes(hour)) {
+      startcounter = 1;
+      price = (
+        startcounter +
+        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1.3
+      ).toFixed(3);
+    } else if (lessBusyHours.includes(hour)) {
+      startcounter = 1;
+      price = (
+        startcounter +
+        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1.1
+      ).toFixed(3);
+    } else {
+      startcounter = 1;
+      price = (
+        startcounter +
+        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1
+      ).toFixed(3);
+    }
+
+    return price;
   };
 
   return (
@@ -297,11 +517,18 @@ const MapHomeScreen = () => {
       )}
       {currentStep == "search" && (
         <SearchPage
-          handleback={() => setcurrentStep("confirm")}
+          handleback={() => {
+            setcurrentStep("home");
+            dispatch(setOrigin(null));
+            dispatch(setDestination(null));
+            setdestinationText("");
+            setoriginText("");
+          }}
           handledestination={setdestinationText}
           destinationText={destinationText}
           originText={originText}
           handleOrigin={setoriginText}
+          handleSearch={handleSearch}
         />
       )}
       {currentStep == "confirm" && (
@@ -364,12 +591,7 @@ const MapHomeScreen = () => {
                 description={driverLocation.description}
                 identifier="driver"
               >
-                <Icon
-                  size={50}
-                  name="location"
-                  type="evilicon"
-                  color="#8B8000"
-                />
+                <EvilIcons size={50} name="location" color="#8B8000" />
               </Marker>
             )}
             {origin?.location && (
@@ -401,24 +623,33 @@ const MapHomeScreen = () => {
             )}
           </MapView>
           {substep === "search" && (
-            <SearchRide onClick={() => setsubstep("confirm")} />
+            <SearchRide
+              onClick={() => {
+                handleSearchForDriver(true);
+              }}
+            />
           )}
           {substep === "confirm" && (
             <ConfirmRide
+              rideInfo={requestDriverInfo}
               onCancel={() => {
-                setcurrentStep("home");
-                setsubstep("search");
+                handleConfirmCancelRequest(false);
               }}
               onConfirm={() => {
-                setsubstep("waiting");
+                handleConfirmCancelRequest(true);
+                //setsubstep("waiting");
               }}
             />
           )}
           {substep === "waiting" && (
-            <WaitingRide onCall={() => setsubstep("onGoing")} />
+            <WaitingRide
+              ride={currentRide}
+              onCall={() => setsubstep("onGoing")}
+            />
           )}
           {substep === "onGoing" && (
             <OngoingRide
+              ride={currentRide}
               onNext={() => {
                 setcurrentStep("finished");
                 setsubstep("search");
@@ -429,16 +660,17 @@ const MapHomeScreen = () => {
       )}
       {currentStep == "finished" && (
         <FinishedPage
+          ride={currentRide}
           OnFinish={() => {
+            setdestinationText("");
+            setoriginText("");
             setcurrentStep("home");
             setsubstep("search");
+            setcurrentRide(null);
           }}
         />
       )}
 
-      {origin && destination && (
-        <Button title="Search For a ride" onPress={handleSearch} />
-      )}
       {searching && (
         <View
           style={{

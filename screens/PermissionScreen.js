@@ -64,7 +64,7 @@ export default function App() {
                   lat: location.coords.latitude,
                   lng: location.coords.longitude,
                 },
-                description: "data.results[0].formatted_address",
+                description: data.results[0]?.formatted_address,
               })
             );
             setErrorMsg(null);

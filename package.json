@@ -9,6 +9,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo/html-elements": "^0.2.0",
     "@react-native-async-storage/async-storage": "~1.17.3",
     "@react-native-community/datetimepicker": "6.2.0",
     "@react-native-community/geolocation": "^3.0.1",
@@ -22,6 +23,7 @@
     "expo-firebase-recaptcha": "~2.3.0",
     "expo-font": "~10.2.0",
     "expo-keep-awake": "~10.2.0",
+    "expo-linking": "~3.2.2",
     "expo-location": "~14.3.0",
     "expo-network": "~4.3.0",
     "expo-splash-screen": "~0.16.2",

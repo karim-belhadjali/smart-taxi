@@ -3,8 +3,9 @@ import React from "react";
 import tw from "twrnc";
 import CarSvg from "../../assets/svg/CarSvg";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import * as Linking from "expo-linking";
 
-const WaitingRide = ({ onCall }) => {
+const WaitingRide = ({ ride, onCall }) => {
   return (
     <View
       style={[
@@ -26,8 +27,9 @@ const WaitingRide = ({ onCall }) => {
           tw`mt-1 pr-10`,
           { fontFamily: "Poppins-Regular", fontSize: 15 },
         ]}
+        numberOfLines={1}
       >
-        Rendez-vous a Avenue Mohamed V
+        Rendez-vous a {ride?.origin.description}
       </Text>
       <View
         key={"separator"}
@@ -48,27 +50,27 @@ const WaitingRide = ({ onCall }) => {
               },
             ]}
           >
-            Toyota Yaris
+            {ride?.driverInfo.carType}
           </Text>
         </View>
         <View style={tw`w-[50%] pl-10`}>
           <Text
             style={[tw``, { fontFamily: "Poppins-SemiBold", fontSize: 20 }]}
           >
-            Karim
+            {ride?.driverInfo.name}
           </Text>
           <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
             En route
           </Text>
           <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
-            10,560 TND
+            {ride?.price} TND
           </Text>
         </View>
       </View>
 
       <TouchableOpacity
         style={tw`rounded-full bg-[#fff] w-[80] border-[#431879] border-2 p-4 flex flex-row justify-center items-center`}
-        onPress={onCall}
+        onPress={() => Linking.openURL(`tel:+216 ${ride?.driverInfo?.phone}`)}
       >
         <FontAwesome name="phone" size={35} color="#431879" />
         <Text style={styles.btnAnnuler}>Appel Driver</Text>

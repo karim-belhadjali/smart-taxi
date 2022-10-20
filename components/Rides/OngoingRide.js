@@ -7,7 +7,8 @@ import StarSvg from "../../assets/svg/StarSvg";
 
 import DestinationSvg from "../../assets/svg/destinationSvg";
 
-const OngoingRide = ({ onNext }) => {
+const OngoingRide = ({ ride, onNext }) => {
+  console.log(ride);
   return (
     <View
       style={[
@@ -30,7 +31,7 @@ const OngoingRide = ({ onNext }) => {
         <SmallCarSvg />
         <View>
           <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
-            10,560 TND
+            {ride?.price} TND
           </Text>
           <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
             Paiement Cash
@@ -59,7 +60,7 @@ const OngoingRide = ({ onNext }) => {
                 { fontFamily: "Poppins-Regular", fontSize: 14 },
               ]}
             >
-              Avenue Mohamed V , Tunis
+              {ride?.origin.description}
             </Text>
             <Text
               style={[
@@ -67,7 +68,7 @@ const OngoingRide = ({ onNext }) => {
                 { fontFamily: "Poppins-Regular", fontSize: 14 },
               ]}
             >
-              Lake of Tunis
+              {ride?.destination.description}
             </Text>
           </View>
         </View>
