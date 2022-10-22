@@ -208,6 +208,11 @@ const LoginScreen = () => {
                   onSubmitEditing={() => {
                     code4.current.focus();
                   }}
+                  onKeyPress={({ nativeEvent }) => {
+                    nativeEvent.key === "Backspace"
+                      ? console.log("delete")
+                      : "//other action";
+                  }}
                   blurOnSubmit={false}
                   focusable
                   textContentType="telephoneNumber"
@@ -344,12 +349,12 @@ const LoginScreen = () => {
                     );
 
                     dispatch(setCurrentUser(currentuser.data()));
-                    navigation.navigate("HomeScreen");
+                    navigation.navigate("CompleteProfileScreen");
                     navigation.reset({
                       index: 0,
                       routes: [
                         {
-                          name: "HomeScreen",
+                          name: "CompleteProfileScreen",
                         },
                       ],
                     });

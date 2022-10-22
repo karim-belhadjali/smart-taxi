@@ -23,17 +23,19 @@ const FinishedPage = ({ ride, OnFinish }) => {
           <View style={tw` mr-5`}>
             <DestinationSvgBig />
           </View>
-          <View style={tw`flex `}>
+          <View style={tw`flex w-70`}>
             <Text
               style={[
                 tw`mb-4`,
                 { fontFamily: "Poppins-Regular", fontSize: 18 },
               ]}
+              numberOfLines={1}
             >
               {ride?.origin.description}
             </Text>
             <Text
               style={[tw`mb-1`, { fontFamily: "Poppins-Bold", fontSize: 18 }]}
+              numberOfLines={1}
             >
               {ride?.destination.description}
             </Text>

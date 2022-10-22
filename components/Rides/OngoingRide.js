@@ -33,7 +33,9 @@ const OngoingRide = ({ ride, onNext }) => {
           <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
             {ride?.price} TND
           </Text>
-          <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
+          <Text
+            style={[tw`pb-2`, { fontFamily: "Poppins-Light", fontSize: 10 }]}
+          >
             Paiement Cash
           </Text>
         </View>

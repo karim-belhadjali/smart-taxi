@@ -148,9 +148,14 @@ const MapHomeScreen = () => {
   useEffect(() => {
     if (!origin || !destination) return;
     const getTravelTime = async () => {
-      const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.description}&destinations=${destination.description}&key=${GOOGLE_MAPS_API_KEY}`;
+      const url = `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${
+        origin.location.lat + "," + origin.location.lng
+      }&destinations=${
+        destination.location.lat + "," + destination.location.lng
+      }&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();
+      console.log(data.rows[0].elements[0]);
       dispatch(setTravelTimeInfo(data.rows[0].elements[0]));
     };
 

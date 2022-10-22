@@ -56,6 +56,7 @@ const CompleteProfileScreen = () => {
       fullName.length > 6
     ) {
       setcurrentStep("step2");
+      setshowerror(null);
     } else if (isValidEmail(email)) {
       setshowerror({ text: "Please enter a valid email" });
     } else if (!fullName.length > 6) {
@@ -151,6 +152,19 @@ const CompleteProfileScreen = () => {
               iconName="mail"
             />
           </View>
+          {showerror && (
+            <View style={[styles.styleSEnregistrer, tw`mb-3`]}>
+              <Text
+                style={{
+                  fontFamily: "Poppins-Regular",
+                  fontSize: 10,
+                  color: "#F74C00",
+                }}
+              >
+                {showerror.text}
+              </Text>
+            </View>
+          )}
           <NextBtn text={"Continuer"} onClick={handleStep1Click} />
         </>
       )}
@@ -305,7 +319,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 159,
     top: -164,
-    backgroundColor: "#431879",
+    backgroundColor: "#431879B8",
     width: 283,
     height: 283,
   },
@@ -313,7 +327,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: -33,
     top: -126,
-    backgroundColor: "#431879B8",
+    backgroundColor: "#431879",
     opacity: 0.9,
     width: 283,
     height: 283,

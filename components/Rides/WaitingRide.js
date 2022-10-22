@@ -24,7 +24,7 @@ const WaitingRide = ({ ride, onCall }) => {
     >
       <Text
         style={[
-          tw`mt-1 pr-10`,
+          tw`mt-1 ml-5 w-90`,
           { fontFamily: "Poppins-Regular", fontSize: 15 },
         ]}
         numberOfLines={1}
@@ -69,7 +69,7 @@ const WaitingRide = ({ ride, onCall }) => {
       </View>
 
       <TouchableOpacity
-        style={tw`rounded-full bg-[#fff] w-[80] border-[#431879] border-2 p-4 flex flex-row justify-center items-center`}
+        style={tw`rounded-full bg-[#fff] h-[15] w-[80] border-[#431879] border-2 p-2 flex flex-row justify-center items-center`}
         onPress={() => Linking.openURL(`tel:+216 ${ride?.driverInfo?.phone}`)}
       >
         <FontAwesome name="phone" size={35} color="#431879" />
