@@ -10,25 +10,21 @@ import {
   StatusBar,
   Image,
 } from "react-native";
-import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
-import {
-  FirebaseRecaptchaVerifierModal,
-  FirebaseRecaptchaBanner,
-} from "expo-firebase-recaptcha";
+import { signInAnonymously } from "firebase/auth";
+
 import { auth, app, functions, db } from "../firebase";
 
 import { doc, getDoc } from "firebase/firestore";
 import { useDispatch } from "react-redux";
-import { setCurrentUser } from "../app/slices/navigationSlice";
+import { setCurrentUser, setUserInfo } from "../app/slices/navigationSlice";
 import tw from "twrnc";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/core";
 import TunisiaSvg from "../assets/svg/TunisiaSvg";
+import NextBtn from "../components/NextBtn";
+import { OTP_KEY } from "@env";
 
 const LoginScreen = () => {
-  // Phone Ref management hooks
-  const recaptchaVerifier = useRef(null);
-
   // Code Ref management hooks
   const code2 = useRef();
   const code3 = useRef();
@@ -43,6 +39,7 @@ const LoginScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState();
   const [verificationId, setVerificationId] = useState();
   const [message, showMessage] = useState();
+  const [error, seterror] = useState();
 
   // Code State management hooks
   const [verifycode, setverifycode] = useState(false);
@@ -56,21 +53,151 @@ const LoginScreen = () => {
   //redux
   const dispatch = useDispatch();
 
-  //firebase
-  const firebaseConfig = app ? app.options : undefined;
-
   const navigation = useNavigation();
+
+  //Border
+  const [border1, setborder1] = useState("#979797");
+  const [border2, setborder2] = useState("#979797");
+  const [border3, setborder3] = useState("#979797");
+  const [border4, setborder4] = useState("#979797");
+
+  const handleSendOtp = async () => {
+    var myHeaders = new Headers();
+    myHeaders.append("x-as-apikey", OTP_KEY);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      messageFormat:
+        "Hello, this is your OTP ${otp}. Please do not share it with anyone",
+      phoneNumber: `+216${phoneNumber}`,
+      otpLength: 4,
+      otpValidityInSeconds: 120,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://www.getapistack.com/api/v1/otp/send", requestOptions)
+      .then((response) => response.text())
+      .then((data) => {
+        const result = JSON.parse(data);
+        setVerificationId(result.data.requestId);
+        setverifycode(true);
+      })
+      .catch((error) => console.log("error", error));
+    setverifycode(true);
+  };
+
+  const handleVerifyOtp = async (otps) => {
+    var myHeaders = new Headers();
+    myHeaders.append("x-as-apikey", OTP_KEY);
+    myHeaders.append("Content-Type", "application/json");
+
+    var raw = JSON.stringify({
+      requestId: verificationId,
+      otp: otps,
+    });
+
+    var requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+
+    fetch("https://www.getapistack.com/api/v1/otp/verify", requestOptions)
+      .then((response) => response.text())
+      .then((result) => {
+        let resp = JSON.parse(result);
+        if (resp.data.isOtpValid == true) {
+          handleSignIn();
+        } else {
+          setborder1("#F74C00");
+          setborder2("#F74C00");
+          setborder3("#F74C00");
+          setborder4("#F74C00");
+          seterror({
+            text: "Ce code est erroné, veuillez vérifier votre boîte de réception pour le code valide",
+          });
+        }
+      })
+      .catch((error) => console.log("error", error));
+  };
+
+  const handleStep1Click = async () => {
+    if (phoneNumber.length > 6) {
+      handleSendOtp();
+    } else {
+      setphonebordercolor("#F74C00");
+      showMessage({ text: "Please enter a valid phone number " });
+    }
+  };
+
+  const storeUser = async (value) => {
+    try {
+      await AsyncStorage.setItem("Client", JSON.stringify(value));
+    } catch (e) {
+      // saving error
+      seterror({
+        text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
+      });
+    }
+  };
+
+  const handleSignIn = async () => {
+    let client;
+    const docRef = doc(db, "clients", phoneNumber);
+    const docSnap = await getDoc(docRef).catch((err) => {
+      seterror({
+        text: "Nous n'avons pas pu accéder à Internet",
+      });
+      return;
+    });
+    if (docSnap?.exists()) {
+      client = docSnap.data();
+      seterror(null);
+      signInAnonymously(auth)
+        .then(async () => {
+          await storeUser(client);
+          dispatch(setCurrentUser(docSnap.data()));
+          navigation.navigate("HomeScreen");
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: "HomeScreen",
+              },
+            ],
+          });
+        })
+        .catch((error) => {
+          seterror({
+            text: "Impossible de se connecter assurez-vous que votre connexion Internet fonctionne, si le problème persiste contactez le support",
+          });
+        });
+    } else {
+      dispatch(setUserInfo({ phone: phoneNumber }));
+      navigation.navigate("CompleteProfileScreen");
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "CompleteProfileScreen",
+          },
+        ],
+      });
+    }
+  };
 
   return (
     <KeyboardAvoidingView
       style={tw`flex items-center h-screen w-screen pt-15 px-4 mt-[${statusbarheight}] bg-[#FFFFFF]`}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <FirebaseRecaptchaVerifierModal
-        ref={recaptchaVerifier}
-        firebaseConfig={app.options}
-        //attemptInvisibleVerification
-      />
       {!verifycode && (
         <>
           <View style={tw`flex items-start  my-4`}>
@@ -98,34 +225,17 @@ const LoginScreen = () => {
               keyboardType="phone-pad"
               textContentType="telephoneNumber"
               onChangeText={(phoneNumber) => setPhoneNumber(phoneNumber)}
-              onFocus={() => setphonebordercolor("#F74C00")}
+              onFocus={() => setphonebordercolor("#FAC100")}
+              onBlur={() => setphonebordercolor("#431879")}
             />
           </View>
+          {message && (
+            <Text style={{ fontFamily: "Poppins-Regular", color: "#F74C00" }}>
+              {message.text}
+            </Text>
+          )}
 
-          <TouchableOpacity
-            style={tw`absolute bottom-5 rounded-full bg-[#431879] w-[80] p-4 flex justify-center items-center`}
-            onPress={async () => {
-              // The FirebaseRecaptchaVerifierModal ref implements the
-              // FirebaseAuthApplicationVerifier interface and can be
-              // passed directly to `verifyPhoneNumber`.
-              try {
-                if (phoneNumber !== "" && phoneNumber.length === 8) {
-                  const phoneProvider = new PhoneAuthProvider(auth);
-                  const verificationId = await phoneProvider.verifyPhoneNumber(
-                    "+216" + phoneNumber,
-                    recaptchaVerifier.current
-                  );
-                  setVerificationId(verificationId);
-                  setverifycode(true);
-                }
-              } catch (err) {
-                showMessage({ text: `Error: ${err.message}`, color: "red" });
-                console.log(err);
-              }
-            }}
-          >
-            <Text style={styles.btn}>Continuer</Text>
-          </TouchableOpacity>
+          <NextBtn text={"Continuer"} onClick={handleStep1Click} />
         </>
       )}
       {verifycode && (
@@ -144,9 +254,9 @@ const LoginScreen = () => {
             >
               Modifier mon numéro
             </Text>
-            <View style={[tw`flex-row w-full mt-4 justify-center`]}>
+            <View style={[tw`flex-row w-full px-3 mt-4  justify-evenly`]}>
               <View
-                style={tw`border rounded-lg mx-1 w-[12] h-[15] flex justify-center items-center `}
+                style={tw`border border-[${border1}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
               >
                 <TextInput
                   ref={code1}
@@ -157,6 +267,8 @@ const LoginScreen = () => {
                   onSubmitEditing={() => {
                     code2.current.focus();
                   }}
+                  onFocus={() => setborder1("#FAC100")}
+                  onBlur={() => setborder1("#979797")}
                   blurOnSubmit={false}
                   textContentType="telephoneNumber"
                   onChangeText={(codeNumber) => {
@@ -171,7 +283,7 @@ const LoginScreen = () => {
                 />
               </View>
               <View
-                style={tw`border rounded-lg mx-1 w-[12] h-[15] flex justify-center items-center `}
+                style={tw`border border-[${border2}] rounded-lg mx-1 w-18  h-[13] flex justify-center items-center `}
               >
                 <TextInput
                   ref={code2}
@@ -182,6 +294,8 @@ const LoginScreen = () => {
                   onSubmitEditing={() => {
                     code3.current.focus();
                   }}
+                  onFocus={() => setborder2("#FAC100")}
+                  onBlur={() => setborder2("#979797")}
                   blurOnSubmit={false}
                   focusable
                   textContentType="telephoneNumber"
@@ -197,7 +311,7 @@ const LoginScreen = () => {
                 />
               </View>
               <View
-                style={tw`border rounded-lg mx-1 w-[12] h-[15] flex justify-center items-center `}
+                style={tw`border border-[${border3}] rounded-lg mx-1 w-18   h-[13] flex justify-center items-center `}
               >
                 <TextInput
                   ref={code3}
@@ -208,11 +322,8 @@ const LoginScreen = () => {
                   onSubmitEditing={() => {
                     code4.current.focus();
                   }}
-                  onKeyPress={({ nativeEvent }) => {
-                    nativeEvent.key === "Backspace"
-                      ? console.log("delete")
-                      : "//other action";
-                  }}
+                  onFocus={() => setborder3("#FAC100")}
+                  onBlur={() => setborder3("#979797")}
                   blurOnSubmit={false}
                   focusable
                   textContentType="telephoneNumber"
@@ -228,7 +339,7 @@ const LoginScreen = () => {
                 />
               </View>
               <View
-                style={tw`border rounded-lg mx-1 w-[12] h-[15] flex justify-center items-center `}
+                style={tw`border border-[${border4}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
               >
                 <TextInput
                   ref={code4}
@@ -237,14 +348,16 @@ const LoginScreen = () => {
                   keyboardType="numeric"
                   returnKeyType="next"
                   onSubmitEditing={() => {
-                    code5.current.focus();
+                    code4.current.blur();
                   }}
+                  onFocus={() => setborder4("#FAC100")}
+                  onBlur={() => setborder4("#979797")}
                   blurOnSubmit={false}
                   focusable
                   textContentType="telephoneNumber"
                   onChangeText={(codeNumber) => {
                     if (codeNumber.length === 1) {
-                      code5.current.focus();
+                      code4.current.blur();
                       setcodeNumber4(codeNumber);
                     } else {
                       setcodeNumber4("");
@@ -253,59 +366,17 @@ const LoginScreen = () => {
                   maxLength={1}
                 />
               </View>
-              <View
-                style={tw`border rounded-lg mx-1 w-[12] h-[15] flex justify-center items-center `}
-              >
-                <TextInput
-                  ref={code5}
-                  style={[tw`ml-2 mt-2`, styles.numbers]}
-                  autoCompleteType="tel"
-                  keyboardType="numeric"
-                  returnKeyType="next"
-                  onSubmitEditing={() => {
-                    code6.current.focus();
-                  }}
-                  blurOnSubmit={false}
-                  focusable
-                  textContentType="telephoneNumber"
-                  onChangeText={(codeNumber) => {
-                    if (codeNumber.length === 1) {
-                      code6.current.focus();
-                      setcodeNumber5(codeNumber);
-                    } else {
-                      setcodeNumber5("");
-                    }
-                  }}
-                  maxLength={1}
-                />
-              </View>
-              <View
-                style={tw`border rounded-lg mx-1 w-[12] h-[15] flex justify-center items-center `}
-              >
-                <TextInput
-                  ref={code6}
-                  style={[tw`ml-2 mt-2`, styles.numbers]}
-                  autoCompleteType="tel"
-                  keyboardType="numeric"
-                  returnKeyType="next"
-                  onSubmitEditing={() => {
-                    code1.current.blur();
-                  }}
-                  blurOnSubmit={false}
-                  focusable
-                  textContentType="telephoneNumber"
-                  onChangeText={(codeNumber) => {
-                    if (codeNumber.length === 1) {
-                      code6.current.blur();
-                      setcodeNumber6(codeNumber);
-                    } else {
-                      setcodeNumber6("");
-                    }
-                  }}
-                  maxLength={1}
-                />
-              </View>
             </View>
+            {error && (
+              <Text
+                style={[
+                  tw`px-5 mt-5`,
+                  { fontFamily: "Poppins-Regular", color: "#F74C00" },
+                ]}
+              >
+                {error.text}
+              </Text>
+            )}
           </View>
           <View style={tw`absolute bottom-5`}>
             <Text style={tw`mb-2`}>
@@ -329,44 +400,26 @@ const LoginScreen = () => {
                     codeNumber1.length === 1 &&
                     codeNumber2.length === 1 &&
                     codeNumber3.length === 1 &&
-                    codeNumber4.length === 1 &&
-                    codeNumber5.length === 1
+                    codeNumber4.length === 1
                   ) {
-                    const credential = PhoneAuthProvider.credential(
-                      verificationId,
-                      codeNumber1 +
-                        codeNumber2 +
-                        codeNumber3 +
-                        codeNumber4 +
-                        codeNumber5 +
-                        codeNumber6
+                    await handleVerifyOtp(
+                      codeNumber1 + codeNumber2 + codeNumber3 + codeNumber4
                     );
-                    await signInWithCredential(auth, credential);
-                    showMessage({ text: "Phone authentication successful 👍" });
-
-                    const currentuser = await getDoc(
-                      doc(db, "users", auth.currentUser.uid)
-                    );
-
-                    dispatch(setCurrentUser(currentuser.data()));
-                    navigation.navigate("CompleteProfileScreen");
-                    navigation.reset({
-                      index: 0,
-                      routes: [
-                        {
-                          name: "CompleteProfileScreen",
-                        },
-                      ],
-                    });
                   } else {
-                    showMessage({
+                    seterror({
                       text: `Error: Pleas fill all the numbers`,
                       color: "red",
                     });
                   }
                 } catch (err) {
-                  showMessage({ text: `Error: ${err.message}`, color: "red" });
-                  console.log(err);
+                  setborder1("#F74C00");
+                  setborder2("#F74C00");
+                  setborder3("#F74C00");
+                  setborder4("#F74C00");
+                  seterror({
+                    text: `Please fill all the numbers`,
+                    color: "red",
+                  });
                 }
               }}
             >

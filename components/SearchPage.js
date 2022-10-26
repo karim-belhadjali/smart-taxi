@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -36,6 +36,17 @@ const SearchPage = ({
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
+  const currentLocation = useSelector(selectCurrentLocation);
+
+  useEffect(() => {
+    dispatch(
+      setOrigin({
+        location: currentLocation.location,
+        description: currentLocation.description,
+      })
+    );
+    handleOrigin(currentLocation);
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -78,39 +89,11 @@ const SearchPage = ({
           </View>
 
           <View style={tw`m-2 bg-transparent w-[70%]`} focusable={true}>
+            <View style={[tw``, toInputBoxStyles.container]}>
+              <Text style={tw`ml-[10] opacity-50`}>Votre emplacement</Text>
+            </View>
             <GooglePlacesAutocomplete
-              placeholder="From where?"
-              autoFillOnNotFound={true}
-              debounce={400}
-              fetchDetails={true}
-              enablePoweredByContainer={false}
-              nearbyPlacesAPI="GooglePlacesSearch"
-              query={{
-                key: GOOGLE_MAPS_API_KEY,
-                language: "en",
-                components: "country:tn",
-              }}
-              styles={toInputBoxStyles}
-              isRowScrollable={true}
-              textInputProps={{
-                value: originText,
-                onChange: (e) => {
-                  handleOrigin(e.target.value);
-                },
-              }}
-              onPress={(data, details = null) => {
-                dispatch(
-                  setOrigin({
-                    location: details?.geometry.location,
-                    description: data.description,
-                  })
-                );
-                handleOrigin(data.description);
-              }}
-            />
-
-            <GooglePlacesAutocomplete
-              placeholder="Where to?"
+              placeholder="Où voulez-vous aller?"
               debounce={400}
               fetchDetails={true}
               enablePoweredByContainer={false}
@@ -194,87 +177,39 @@ const SearchPage = ({
             style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-[90%]`}
           />
         </View>
-
-        <FlatList
-          data={favoritesData}
-          ItemSeparatorComponent={() => (
-            <View
-              style={[
-                tw`bg-gray-200`,
-                {
-                  height: 1,
-                },
-              ]}
-            />
-          )}
-          renderItem={(item) => {
-            return (
-              <TouchableOpacity
-                style={tw`flex my-2 w-screen px-4`}
-                onPress={() => {
-                  handledestination(item.item.description);
-                  dispatch(
-                    setDestination({
-                      location: item.item.location,
-                      description: item.item.description,
-                    })
-                  );
-                }}
-              >
-                <View style={tw`flex flex-row`}>
-                  <Entypo
-                    name="location-pin"
-                    style={tw`mt-1  `}
-                    size={25}
-                    color={"#4F4F4F"}
-                  />
-                  <Text
-                    style={[
-                      tw`flex-1 mt-1 mx-8 opacity-60`,
-                      { fontFamily: "Poppins-Light", fontSize: 18 },
-                    ]}
-                  >
-                    {item.item.description}
-                  </Text>
-                </View>
-                <View
-                  key={"separator"}
-                  style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 `}
-                />
-              </TouchableOpacity>
-            );
-          }}
-          keyExtractor={(item) => item.name}
-        />
       </View>
 
-      {/* {origin && destination && ( */}
-      <TouchableOpacity
-        style={tw`absolute w-screen flex items-center justify-center bottom-2`}
-        onPress={() => {
-          handleSearch();
-        }}
-      >
-        <View
-          key={"separator"}
-          style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-screen`}
-        />
-        <View style={tw`flex flex-row justify-center items-center`}>
-          <AntDesign
-            style={tw` pr-3`}
-            name="search1"
-            size={20}
-            color="#000000"
+      {destination && (
+        <TouchableOpacity
+          style={tw`absolute w-screen flex items-center justify-center bottom-2`}
+          onPress={() => {
+            handleSearch();
+          }}
+        >
+          <View
+            key={"separator"}
+            style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-screen`}
           />
 
-          <Text
-            style={[tw`mt-1`, { fontFamily: "Poppins-Regular", fontSize: 18 }]}
-          >
-            Rechercher
-          </Text>
-        </View>
-      </TouchableOpacity>
-      {/* )} */}
+          <View style={tw`flex flex-row justify-center items-center`}>
+            <AntDesign
+              style={tw` pr-3`}
+              name="search1"
+              size={20}
+              color="#000000"
+            />
+
+            <Text
+              style={[
+                tw`mt-1`,
+                { fontFamily: "Poppins-Regular", fontSize: 18 },
+              ]}
+            >
+              Rechercher
+            </Text>
+          </View>
+        </TouchableOpacity>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -308,6 +243,9 @@ const toInputBoxStyles = StyleSheet.create({
     flex: 0,
     opacity: 0.5,
     borderRadius: 5,
+    fontSize: 15,
+    paddingTop: 10,
+    height: 35,
   },
   textInput: {
     backgroundColor: "transparent",
@@ -320,16 +258,3 @@ const toInputBoxStyles = StyleSheet.create({
     paddingBottom: 0,
   },
 });
-
-const favoritesData = [
-  {
-    name: "Home",
-    location: { lat: 20.4945, lng: -0.4118 },
-    description: "Ezzahra",
-  },
-  {
-    name: "Work",
-    location: { lat: 5.5497, lng: -0.3522 },
-    description: "Rades",
-  },
-];

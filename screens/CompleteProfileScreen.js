@@ -19,12 +19,18 @@ import DatePicker from "../components/DatePicker";
 import Input from "../components/Input";
 import RadioButtons from "../components/RadioButton";
 
-import { auth, app, functions, httpsCallable } from "../firebase";
+import { auth, app, functions, httpsCallable, db } from "../firebase";
 
 import { useNavigation } from "@react-navigation/core";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUserInfo, setCurrentUser } from "../app/slices/navigationSlice";
+import { doc, setDoc } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CompleteProfileScreen = () => {
   const navigation = useNavigation();
+  let userinfo = useSelector(selectUserInfo);
+  const dispatch = useDispatch();
 
   const [currentStep, setcurrentStep] = useState("step1");
   const [email, setemail] = useState("");
@@ -53,16 +59,14 @@ const CompleteProfileScreen = () => {
       fullName !== "" &&
       email !== "" &&
       isValidEmail(email) &&
-      fullName.length > 6
+      fullName.length > 4
     ) {
       setcurrentStep("step2");
       setshowerror(null);
-    } else if (isValidEmail(email)) {
-      setshowerror({ text: "Please enter a valid email" });
-    } else if (!fullName.length > 6) {
-      setshowerror({ text: "Please enter a valid full name" });
     } else {
-      setshowerror({ text: "Please fill all the required values" });
+      setshowerror({
+        text: "veuillez saisir des valeurs valides pour l'e-mail et le nom complet",
+      });
     }
   };
   const handleReturn = () => {
@@ -77,30 +81,51 @@ const CompleteProfileScreen = () => {
     if (currentStep === "step2") {
       setcurrentStep("step3");
     } else {
-      const completeUser = httpsCallable(functions, "completeUser");
-      completeUser({
-        fullName: fullName,
-        email: email,
-        gouvernorat: selectedGov,
-        ville: selectedVille,
-        birthDate: currentDate,
-        codePostal: codePostal,
-        attendance: { main: mainGroup, secondary: subGroup },
-      })
-        .then((e) => {
-          navigation.navigate("HomeScreen");
-          navigation.reset({
-            index: 0,
-            routes: [
-              {
-                name: "HomeScreen",
-              },
-            ],
+      setDoc(
+        doc(db, "clients", userinfo.phone),
+        {
+          fullName: fullName,
+          email: email,
+          gouvernorat: selectedGov,
+          ville: selectedVille,
+          birthDate: currentDate.toString(),
+          codePostal: codePostal,
+          attendance: { main: mainGroup, secondary: subGroup },
+          phone: userinfo?.phone,
+        },
+        {
+          merge: true,
+        }
+      )
+        .then(async () => {
+          dispatch(
+            setCurrentUser({
+              fullName: fullName,
+              email: email,
+              gouvernorat: selectedGov,
+              ville: selectedVille,
+              birthDate: currentDate.toString(),
+              codePostal: codePostal,
+              attendance: { main: mainGroup, secondary: subGroup },
+              phone: userinfo?.phone,
+            })
+          );
+          await storeUser({
+            fullName: fullName,
+            email: email,
+            gouvernorat: selectedGov,
+            ville: selectedVille,
+            birthDate: currentDate,
+            codePostal: codePostal,
+            attendance: { main: mainGroup, secondary: subGroup },
+            phone: userinfo?.phone,
           });
         })
-        .catch((error) => {
+        .catch((err) => {
           setcurrentStep("step1");
-          showerror({ text: "There was a problem while updating you profile" });
+          showerror({
+            text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
+          });
         });
     }
   };
@@ -108,6 +133,27 @@ const CompleteProfileScreen = () => {
   function isValidEmail(email) {
     return /\S+@\S+\.\S+/.test(email);
   }
+
+  const storeUser = async (value) => {
+    try {
+      await AsyncStorage.setItem("Client", JSON.stringify(value));
+      navigation.navigate("HomeScreen");
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "HomeScreen",
+          },
+        ],
+      });
+    } catch (e) {
+      setcurrentStep("step1");
+      showerror({
+        text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
+      });
+    }
+  };
+
   useEffect(() => {
     if (mainGroup === "Régulierement") {
       setsubGroup("Hébdomadaire");
@@ -132,7 +178,7 @@ const CompleteProfileScreen = () => {
       </TouchableOpacity>
       {currentStep === "step1" && (
         <>
-          <View style={[styles.styleSEnregistrer, tw`mb-9`]}>
+          <View style={[styles.styleSEnregistrer, tw`mb-5`]}>
             <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 30 }}>
               S'enregistrer
             </Text>
@@ -153,11 +199,11 @@ const CompleteProfileScreen = () => {
             />
           </View>
           {showerror && (
-            <View style={[styles.styleSEnregistrer, tw`mb-3`]}>
+            <View style={[styles.styleSEnregistrer, tw`mt-5 px-2`]}>
               <Text
                 style={{
                   fontFamily: "Poppins-Regular",
-                  fontSize: 10,
+                  fontSize: 14,
                   color: "#F74C00",
                 }}
               >

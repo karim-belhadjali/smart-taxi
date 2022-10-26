@@ -19,14 +19,6 @@ const AboutScreen = () => {
   const handleReturn = () => {
     if (currentScreen === "main") {
       navigation.navigate("MainDrawer");
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: "MainDrawer",
-          },
-        ],
-      });
     }
   };
   return (

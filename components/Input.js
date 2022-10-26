@@ -20,6 +20,8 @@ const Input = ({ placeHolder, value, onChangeText }) => {
         value={value}
         onChangeText={(text) => onChangeText(text)}
         style={tw`flex-1`}
+        keyboardType="number-pad"
+        blurOnSubmit={true}
         onFocus={() => {
           setborderColor("#F74C00");
         }}

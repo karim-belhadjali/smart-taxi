@@ -6,6 +6,7 @@ import MapHomeScreen from "../screens/MapHomeScreen";
 import CompleteProfileScreen from "../screens/CompleteProfileScreen";
 import AboutScreen from "../screens/AboutScreen";
 import MainDrawer from "./MainDrawer";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +55,7 @@ const HomeNavigation = () => {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
     </Stack.Navigator>
   );
 };

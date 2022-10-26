@@ -60,10 +60,6 @@ import WaitingRide from "../components/Rides/WaitingRide";
 import OngoingRide from "../components/Rides/OngoingRide";
 import FinishedPage from "../components/FinishedPage";
 import { useNavigation } from "@react-navigation/core";
-import MainDrawer from "../components/MainDrawer";
-import { set } from "react-native-reanimated";
-// {"status": "NOT_FOUND"}
-//  LOG  {"distance": {"text": "84.7 km", "value": 84667}, "duration": {"text": "1 hour 26 mins", "value": 5139}, "status": "OK"}
 
 const MapHomeScreen = () => {
   const navigation = useNavigation();
@@ -74,6 +70,7 @@ const MapHomeScreen = () => {
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
+  const currentUser = useSelector(selectCurrentUser);
   const currentLocation = useSelector(selectCurrentLocation);
   const travelTimeInfo = useSelector(selectTravelTimeInfo);
   const driverLocation = useSelector(selectDriverLocation);
@@ -155,130 +152,19 @@ const MapHomeScreen = () => {
       }&key=${GOOGLE_MAPS_API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();
-      console.log(data.rows[0].elements[0]);
       dispatch(setTravelTimeInfo(data.rows[0].elements[0]));
     };
 
     getTravelTime();
   }, [origin, destination, GOOGLE_MAPS_API_KEY]);
 
-  useEffect(() => {
-    if (!requestSent) return;
-    const q = query(collection(db, "Current Ride"));
-    const ref = onSnapshot(q, async (querySnapshot) => {
-      console.log("in Listner");
-      if (!occupied) {
-        console.log("user not occupied");
-        let rideStarted = false;
-        for (let index = 0; index < querySnapshot?.docs?.length; index++) {
-          if (rideStarted) break;
-          const docu = querySnapshot.docs[index].data();
-          if (docu.uid === user.uid) {
-            rideStarted = true;
-            dispatch(setDriverLocation(docu.driver.driverLocation));
-            setoccupied(true);
-            setsearching(false);
-            setdriverInfo({
-              driverName: docu.driver.driverId,
-              location: docu.driver.driverLocation,
-            });
-            ref();
-          }
-        }
-        return;
-      }
-    });
-    return () => ref();
-  }, [requestSent]);
-
-  useEffect(() => {
-    if (!occupied && ref) return () => ref();
-    if (!occupied) return;
-    const ref = onSnapshot(doc(db, "Current Ride", user.uid), (doc) => {
-      if (doc.exists()) {
-        if (!currentDoc) {
-          setcurrentDoc(doc);
-        }
-        dispatch(setDriverLocation(doc?.data()?.driver.driverLocation));
-
-        if (doc?.data()?.canceledByDriver) {
-          setoccupied(false);
-          setcurrentDoc(undefined);
-          setrequestAccepted(false);
-          setrequestSent(false);
-          dispatch(setOrigin(undefined));
-          dispatch(setDriverLocation(undefined));
-          dispatch(setDestination(undefined));
-          ref();
-          return;
-        }
-        if (doc?.data()?.finished) {
-          setoccupied(false);
-          setcurrentDoc(undefined);
-          setrequestAccepted(false);
-          setrequestSent(false);
-          dispatch(setOrigin(undefined));
-          dispatch(setDriverLocation(undefined));
-          dispatch(setDestination(undefined));
-          ref();
-        }
-      } else {
-        ref();
-        return;
-      }
-    });
-    return () => ref();
-  }, [occupied]);
-
-  const handleCancelClient = () => {
-    setDoc(
-      doc(db, "Current Ride", currentDoc.data().uid),
-      { canceledByClient: true },
-      { merge: true }
-    ).then(() => {
-      setDoc(
-        doc(
-          db,
-          "Canceled Rides",
-          currentDoc.data().uid +
-            "_" +
-            currentDoc.data().driver.driverId +
-            "_" +
-            Date.now()
-        ),
-        {
-          userUid: user.uid,
-          driverUid: currentDoc.data().driver.driverId,
-          startTime: currentDoc.data().startedAt,
-          FinishedTime: Date.now(),
-          finalPrice: currentDoc.data().price,
-          driverStartingLocation:
-            currentDoc.data().driver.driverstartingLocation,
-          pickUpPlace: currentDoc.data().client.origin,
-          rideDestination: currentDoc.data().client.destination,
-          canceledBy: "client",
-        }
-      ).then((e) => {
-        setoccupied(false);
-        setcurrentDoc(undefined);
-        setrequestAccepted(false);
-        setrequestSent(false);
-        dispatch(setOrigin(undefined));
-        dispatch(setDriverLocation(undefined));
-        dispatch(setDestination(undefined));
-        // setTimeout(() => {
-        //   deleteDoc(doc(db, "Current Ride", user.uid));
-        // }, 3000);
-      });
-    });
-  };
   const handleSearch = () => {
     if (travelTimeInfo !== null && travelTimeInfo?.status !== "NOT_FOUND") {
       let distance = parseFloat(travelTimeInfo.distance.text);
       let duration = travelTimeInfo.duration.text;
       setsubstep("search");
       setDoc(
-        doc(db, "Ride Requests", auth.currentUser.uid),
+        doc(db, "Ride Requests", currentUser?.phone),
         {
           driverAccepted: false,
           clientAccepted: false,
@@ -295,18 +181,15 @@ const MapHomeScreen = () => {
           setcurrentStep("confirm");
           handleSearchForDriver(false);
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        .catch((err) => {});
     } else {
-      console.log(travelTimeInfo);
     }
   };
 
   const handleSearchForDriver = (del) => {
     if (!del) {
       const unsub = onSnapshot(
-        doc(db, "Ride Requests", auth.currentUser.uid),
+        doc(db, "Ride Requests", currentUser?.phone),
         async (current) => {
           if (current.exists()) {
             const request = current.data();
@@ -333,11 +216,12 @@ const MapHomeScreen = () => {
             }
           } else {
             unsub();
+            setcurrentStep("home");
           }
         }
       );
     } else {
-      //deleteDoc(doc(db, "Ride Requests", auth.currentUser.uid));
+      deleteDoc(doc(db, "Ride Requests", currentUser?.phone));
       setcurrentStep("home");
       dispatch(setOrigin(null));
       dispatch(setDestination(null));
@@ -349,14 +233,13 @@ const MapHomeScreen = () => {
   const handleConfirmCancelRequest = (confirm) => {
     if (confirm) {
       setDoc(
-        doc(db, "Ride Requests", auth.currentUser.uid),
+        doc(db, "Ride Requests", currentUser?.phone),
         {
           clientAccepted: true,
         },
         { merge: true }
       )
         .then(async () => {
-          console.log("in confirmation");
           let newRide = {
             canceledByDriver: false,
             canceledByClient: false,
@@ -374,11 +257,10 @@ const MapHomeScreen = () => {
             finished: false,
           };
           dispatch(setDriverLocation(currentRequest?.driverInfo?.location));
-          setDoc(doc(db, "Current Rides", auth.currentUser.uid), newRide, {
+          setDoc(doc(db, "Current Courses", currentUser?.phone), newRide, {
             merge: true,
           })
             .then(() => {
-              console.log("confirmation success");
               setcurrentRide(newRide);
               setcurrentStep("confirm");
               setsubstep("waiting");
@@ -386,16 +268,12 @@ const MapHomeScreen = () => {
               handleSearchForDriver(false);
               handleWaitForDriver(false);
             })
-            .catch((err) => {
-              console.log(err);
-            });
+            .catch((err) => {});
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        .catch((err) => {});
     } else {
       setDoc(
-        doc(db, "Ride Requests", auth.currentUser.uid),
+        doc(db, "Ride Requests", currentUser?.phone),
         {
           canceled: true,
         },
@@ -410,28 +288,23 @@ const MapHomeScreen = () => {
           dispatch(setOrigin(null));
           setdestinationText("");
           setoriginText("");
-          // setTimeout(() => {
-          //   deleteDoc(doc(db, "Ride Requests", auth.currentUser.uid));
-          // }, 3000);
         })
-        .catch((err) => {
-          console.log(err);
-        });
+        .catch((err) => {});
     }
   };
 
   const handleWaitForDriver = (del) => {
     const unsub = onSnapshot(
-      doc(db, "Current Rides", auth.currentUser.uid),
+      doc(db, "Current Courses", currentUser?.phone),
       async (current) => {
         const request = current.data();
-        console.log(request);
+
         if (!request.finished) {
           dispatch(setDriverLocation(request?.driverInfo?.location));
         }
         if (request.driverArrived && request.driveStarted === false) {
           setDoc(
-            doc(db, "Current Rides", auth.currentUser.uid),
+            doc(db, "Current Courses", currentUser?.phone),
             { driveStarted: true },
             {
               merge: true,
@@ -442,9 +315,7 @@ const MapHomeScreen = () => {
               setsubstep("onGoing");
               dispatch(setOrigin(null));
             })
-            .catch((err) => {
-              console.log(err);
-            });
+            .catch((err) => {});
         } else if (request.finished) {
           setcurrentStep("finished");
           setsubstep("search");
@@ -458,37 +329,13 @@ const MapHomeScreen = () => {
 
   const calculatePrice = async (distanceClient, distanceDriver) => {
     var hour = new Date().getHours();
-    let startcounter;
+    let startcounter = 1.1;
     const nightyHours = [21, 22, 23, 0, 1, 2, 3, 4, 5];
     const busyHours = [7, 8, 17, 18];
     const lessBusyHours = [9, 10, 16, 19];
     let price = 0;
 
-    if (nightyHours.includes(hour)) {
-      startcounter = 1.5;
-      price = (
-        startcounter +
-        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1.5
-      ).toFixed(3);
-    } else if (busyHours.includes(hour)) {
-      startcounter = 1;
-      price = (
-        startcounter +
-        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1.3
-      ).toFixed(3);
-    } else if (lessBusyHours.includes(hour)) {
-      startcounter = 1;
-      price = (
-        startcounter +
-        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1.1
-      ).toFixed(3);
-    } else {
-      startcounter = 1;
-      price = (
-        startcounter +
-        (parseFloat(distanceClient) + parseFloat(distanceDriver)) * 1
-      ).toFixed(3);
-    }
+    price = (startcounter + parseFloat(distanceClient) * 1.1).toFixed(3);
 
     return price;
   };
@@ -554,7 +401,7 @@ const MapHomeScreen = () => {
             {origin && destination && (
               <MapViewDirections
                 origin={`${origin.location.lat},${origin.location.lng}`}
-                destination={destination.description}
+                destination={`${destination.location.lat},${destination.location.lng}`}
                 apikey={GOOGLE_MAPS_API_KEY}
                 strokeWidth={3}
                 strokeColor="blue"
@@ -566,12 +413,22 @@ const MapHomeScreen = () => {
                 origin={`${origin.location.lat},${origin.location.lng}`}
                 destination={`${driverLocation.location.lat},${driverLocation.location.lng}`}
                 apikey={GOOGLE_MAPS_API_KEY}
-                strokeWidth={3}
+                strokeWidth={5}
                 strokeColor="red"
                 lineDashPattern={[0]}
               />
             )}
-            {!origin && (
+            {!origin && driverLocation && (
+              <MapViewDirections
+                origin={`${driverLocation.location.lat},${driverLocation.location.lng}`}
+                destination={`${destination.location.lat},${destination.location.lng}`}
+                apikey={GOOGLE_MAPS_API_KEY}
+                strokeWidth={5}
+                strokeColor="red"
+                lineDashPattern={[0]}
+              />
+            )}
+            {!origin && !destination && (
               <Marker
                 coordinate={{
                   latitude: currentLocation.location.lat,
@@ -675,99 +532,8 @@ const MapHomeScreen = () => {
           }}
         />
       )}
-
-      {searching && (
-        <View
-          style={{
-            position: "absolute",
-            height: "100%",
-            width: "100%",
-            backgroundColor: "black",
-            opacity: 0.5,
-            zIndex: 100,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <ActivityIndicator size={100} />
-        </View>
-      )}
-      {requestAccepted && (
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            height: "100%",
-            width: "100%",
-            backgroundColor: "black",
-            opacity: 0.5,
-            zIndex: 100,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            color: "black",
-          }}
-          onPress={() => setrequestAccepted(false)}
-        >
-          <Text>{driverInfo?.driverName}</Text>
-          <Text>{driverInfo?.location}</Text>
-        </TouchableOpacity>
-      )}
-      {occupied && <Button title="Cancel ride" onPress={handleCancelClient} />}
     </KeyboardAvoidingView>
   );
 };
 
 export default MapHomeScreen;
-
-const styles = StyleSheet.create({});
-const toInputBoxStyle2 = StyleSheet.create({
-  container: {
-    backgroundColor: "#CAC8C8",
-    flex: 0,
-    opacity: 0.5,
-    borderRadius: 5,
-    marginTop: 5,
-  },
-  textInput: {
-    backgroundColor: "transparent",
-    fontSize: 15,
-    paddingTop: 10,
-    height: 35,
-    opacity: 1,
-  },
-  textInputContainer: {
-    paddingBottom: 0,
-  },
-});
-const toInputBoxStyles = StyleSheet.create({
-  container: {
-    backgroundColor: "#CAC8C8",
-    flex: 0,
-    opacity: 0.5,
-    borderRadius: 5,
-  },
-  textInput: {
-    backgroundColor: "transparent",
-    fontSize: 15,
-    paddingTop: 10,
-    height: 35,
-    opacity: 1,
-  },
-  textInputContainer: {
-    paddingBottom: 0,
-  },
-});
-
-const favoritesData = [
-  {
-    name: "Home",
-    location: { lat: 20.4945, lng: -0.4118 },
-    description: "Ezzahra",
-  },
-  {
-    name: "Work",
-    location: { lat: 5.5497, lng: -0.3522 },
-    description: "Rades",
-  },
-];

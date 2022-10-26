@@ -10,15 +10,17 @@ import tw from "twrnc";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MenuItem from "./MenuItem";
 import { useNavigation } from "@react-navigation/core";
+import { selectCurrentUser } from "../app/slices/navigationSlice";
+import { useSelector } from "react-redux";
 
 const MainDrawer = () => {
   const navigation = useNavigation();
-
+  const user = useSelector(selectCurrentUser);
   return (
     <View
       style={tw`flex flex-row w-screen h-full pt-[${StatusBar.currentHeight}]`}
     >
-      <View style={tw`bg-[#FFFFFF] o w-[75%] flex items-center`}>
+      <View style={tw`bg-[#FFFFFF]  w-[75%] flex items-center`}>
         <View style={tw`w-[90%] flex flex-row mt-5`}>
           <View
             style={tw`bg-[#431879] rounded-full w-12 h-12 flex justify-center items-center`}
@@ -30,8 +32,9 @@ const MainDrawer = () => {
               tw`mt-3 mx-3`,
               { fontFamily: "Poppins-Bold", fontSize: 20 },
             ]}
+            numberOfLines={1}
           >
-            Klai houssem
+            {user?.fullName}
           </Text>
         </View>
         <View style={tw`bg-[#000000] opacity-10 h-[.45] w-full mt-5`} />
@@ -39,26 +42,20 @@ const MainDrawer = () => {
           <MenuItem
             iconName={"hearto"}
             text="Profile"
-            onClick={() => console.log("disabled")}
+            onClick={() => navigation.navigate("Profile")}
           />
-          <MenuItem
-            iconName={"clockcircleo"}
-            text="Historique"
-            onClick={() => console.log("disabled")}
-          />
+          <View style={tw`opacity-30`}>
+            <MenuItem
+              iconName={"clockcircleo"}
+              text="Historique"
+              onClick={() => console.log("disabled")}
+            />
+          </View>
           <MenuItem
             iconName={"infocirlceo"}
             text="À propos"
             onClick={() => {
               navigation.navigate("AboutScreen");
-              navigation.reset({
-                index: 0,
-                routes: [
-                  {
-                    name: "AboutScreen",
-                  },
-                ],
-              });
             }}
           />
         </View>

@@ -15,7 +15,7 @@ const FinishedPage = ({ ride, OnFinish }) => {
   return (
     <View
       style={tw`flex justify-around items-center w-screen h-screen  pt-[${
-        StatusBar.currentHeight + 50
+        StatusBar.currentHeight + 10
       }]`}
     >
       <View key={"road"} style={tw`flex  `}>
@@ -69,7 +69,7 @@ const FinishedPage = ({ ride, OnFinish }) => {
         <Text
           style={[tw`pt-2`, { fontFamily: "Poppins-Regular", fontSize: 14 }]}
         >
-          beem vous souhaite une Bonne route !
+          beem vous souhaite une Bonne journée !
         </Text>
         <StarSvg />
       </View>

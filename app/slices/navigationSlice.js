@@ -52,6 +52,7 @@ export const selectOrigin = (state) => state.navigation.origin;
 export const selectDestination = (state) => state.navigation.destination;
 export const selectTravelTimeInfo = (state) => state.navigation.travelTimeInfo;
 export const selectCurrentUser = (state) => state.navigation.currentUser;
+export const selectUserInfo = (state) => state.navigation.userInfo;
 export const selectDriverLocation = (state) => state.navigation.driverLocation;
 export const selectCurrentLocation = (state) =>
   state.navigation.currentLocation;

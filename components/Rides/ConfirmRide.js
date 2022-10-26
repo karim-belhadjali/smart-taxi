@@ -44,7 +44,7 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
             {rideInfo?.driverName}
           </Text>
           <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
-            Arrive dans {rideInfo?.time} min
+            Arrive dans {rideInfo?.time}
           </Text>
           {!isNaN(rideInfo?.price) && (
             <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>

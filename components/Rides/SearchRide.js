@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Image, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import tw from "twrnc";
 import CarSvg from "../../assets/svg/CarSvg";
@@ -8,7 +8,7 @@ const SearchRide = ({ onClick }) => {
   return (
     <View
       style={[
-        tw`bg-[#FFFFFF] w-screen h-[40%] rounded-t-2xl p-4 flex justify-center items-center`,
+        tw`bg-[#FFFFFF] w-screen h-[40%] rounded-t-2xl px-4 py-2 flex justify-center items-center`,
         {
           shadowRadius: 100,
           shadowOpacity: 0.8,
@@ -23,9 +23,9 @@ const SearchRide = ({ onClick }) => {
     >
       <CarSvg />
       <View style={tw`my-2`} />
-      <Loader color="#431879" />
+      <ActivityIndicator size={"large"} color="#431879" />
       <Text
-        style={[tw`mt-5`, { fontFamily: "Poppins-SemiBold", fontSize: 18 }]}
+        style={[tw`mt-3`, { fontFamily: "Poppins-SemiBold", fontSize: 18 }]}
       >
         Recherche en cours
       </Text>

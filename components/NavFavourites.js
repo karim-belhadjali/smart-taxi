@@ -64,17 +64,7 @@ const NavFavourites = ({ onSearch, recents }) => {
           )}
           renderItem={(item) => {
             return (
-              <TouchableOpacity
-                style={tw`flex flex-row my-2 w-screen`}
-                onPress={() =>
-                  dispatch(
-                    setDestination({
-                      location: item.item.location,
-                      description: item.item.description,
-                    })
-                  )
-                }
-              >
+              <TouchableOpacity style={tw`flex flex-row my-2 w-screen`}>
                 <EvilIcons
                   style={tw` pr-3`}
                   name="clock"
@@ -83,11 +73,11 @@ const NavFavourites = ({ onSearch, recents }) => {
                 />
                 <Text
                   style={[
-                    tw`flex-1 mt-1 opacity-60`,
-                    { fontFamily: "Poppins-Light", fontSize: 18 },
+                    tw`flex-1 mt-1 opacity-30`,
+                    { fontFamily: "Poppins-Light", fontSize: 15 },
                   ]}
                 >
-                  {item.item.description}
+                  Lieux récents bientôt disponibles
                 </Text>
               </TouchableOpacity>
             );

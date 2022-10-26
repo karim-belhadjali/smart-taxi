@@ -9,16 +9,19 @@ import {
   Dimensions,
   Image,
   StatusBar,
+  Alert,
 } from "react-native";
 
 import * as Location from "expo-location";
 import * as Network from "expo-network";
-import * as SplashScreen from "expo-splash-screen";
 import { GOOGLE_MAPS_API_KEY } from "@env";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   selectCurrentLocation,
   setCurrentLocation,
+  setCurrentUser,
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
@@ -47,45 +50,98 @@ export default function App() {
       let { isConnected, isInternetReachable } =
         await Network.getNetworkStateAsync();
       if (isConnected && isInternetReachable) {
-        let { status } = await Location.requestBackgroundPermissionsAsync();
+        let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
-          setErrorMsg("Permission to access location was denied");
+          Alert.alert(
+            "Autorisation de localisation",
+            "Cette application doit avoir accès à votre emplacement pour fonctionner, si le problème persiste, autorisez-le manuellement dans les paramètres",
+            [
+              {
+                text: "Réessayer",
+                onPress: () => {
+                  setreload(!reload);
+                },
+              },
+            ]
+          );
           return;
-        }
-
-        await Location.getCurrentPositionAsync({})
-          .then(async (location) => {
-            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`;
-            const response = await fetch(url);
-            const data = await response.json();
-            dispatch(
-              setCurrentLocation({
-                location: {
-                  lat: location.coords.latitude,
-                  lng: location.coords.longitude,
-                },
-                description: data.results[0]?.formatted_address,
-              })
-            );
-            setErrorMsg(null);
-            navigation.navigate("LoginScreen");
-            navigation.reset({
-              index: 0,
-              routes: [
-                {
-                  name: "LoginScreen",
-                },
-              ],
+        } else {
+          await Location.getCurrentPositionAsync({})
+            .then(async (location) => {
+              const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+              const response = await fetch(url);
+              const data = await response.json();
+              dispatch(
+                setCurrentLocation({
+                  location: {
+                    lat: location.coords.latitude,
+                    lng: location.coords.longitude,
+                  },
+                  description: data.results[0]?.formatted_address,
+                })
+              );
+              await getUser("Client");
+            })
+            .catch((e) => {
+              setErrorMsg(e.message);
             });
-          })
-          .catch((e) => {
-            setErrorMsg(e.message);
-          });
+        }
       } else {
         setErrorMsg("No Internet Connection is detected please try again");
+        Alert.alert(
+          "Connexion Internet non détectée",
+          "Aucune connexion Internet n'est détectée, veuillez réessayer",
+          [
+            {
+              text: "Réessayer",
+              onPress: () => {
+                setreload(!reload);
+              },
+            },
+          ]
+        );
       }
     })();
   }, [reload]);
+
+  const getUser = async (key) => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      if (value !== null) {
+        let client = JSON.parse(value);
+        dispatch(setCurrentUser(client));
+        navigation.navigate("HomeScreen");
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "HomeScreen",
+            },
+          ],
+        });
+      } else {
+        navigation.navigate("LoginScreen");
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "LoginScreen",
+            },
+          ],
+        });
+      }
+    } catch (e) {
+      navigation.navigate("LoginScreen");
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "LoginScreen",
+          },
+        ],
+      });
+    }
+  };
 
   const handleTryAgain = () => {
     setreload(!reload);

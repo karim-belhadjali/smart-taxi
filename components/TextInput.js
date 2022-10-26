@@ -29,7 +29,7 @@ const TextInputs = ({ placeHolder, value, onChangeText, iconName }) => {
         onChangeText={(text) => onChangeText(text)}
         style={tw`flex-1`}
         onFocus={() => {
-          setborderColor("#F74C00");
+          setborderColor("#FAC100");
         }}
         onBlur={() => setborderColor("#431879")}
       />
