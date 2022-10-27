@@ -49,7 +49,7 @@ const NavFavourites = ({ onSearch, recents }) => {
           Recherche de la destination
         </Text>
       </TouchableOpacity>
-      <View style={[tw`flex justify-center w-[90%] items-center mt-2 px-2`]}>
+      <View style={[tw`flex justify-center w-[100%] items-center mt-2 px-2`]}>
         <FlatList
           data={favoritesData}
           ItemSeparatorComponent={() => (

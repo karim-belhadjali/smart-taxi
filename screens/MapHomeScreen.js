@@ -88,12 +88,6 @@ const MapHomeScreen = () => {
   const [destinationText, setdestinationText] = useState("");
   const [originText, setoriginText] = useState();
   const [searching, setsearching] = useState(false);
-  const [displaySearchBar, setdisplaySearchBar] = useState(true);
-  const [requestSent, setrequestSent] = useState(false);
-  const [requestAccepted, setrequestAccepted] = useState(false);
-  const [occupied, setoccupied] = useState(false);
-  const [driverInfo, setdriverInfo] = useState("");
-  const [currentDoc, setcurrentDoc] = useState(undefined);
   const [currentStep, setcurrentStep] = useState("home");
   const [substep, setsubstep] = useState("search");
   const [mapHeight, setmapHeight] = useState("60%");
@@ -158,8 +152,13 @@ const MapHomeScreen = () => {
     getTravelTime();
   }, [origin, destination, GOOGLE_MAPS_API_KEY]);
 
+  useEffect(() => {
+    setsearching(false);
+  }, []);
+
   const handleSearch = () => {
     if (travelTimeInfo !== null && travelTimeInfo?.status !== "NOT_FOUND") {
+      setsearching(true);
       let distance = parseFloat(travelTimeInfo.distance.text);
       let duration = travelTimeInfo.duration.text;
       setsubstep("search");
@@ -178,6 +177,7 @@ const MapHomeScreen = () => {
         { merge: true }
       )
         .then(() => {
+          setsearching(false);
           setcurrentStep("confirm");
           handleSearchForDriver(false);
         })
@@ -345,20 +345,22 @@ const MapHomeScreen = () => {
       style={{ flex: 1, paddingTop: StatusBar.currentHeight }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {currentStep !== "confirm" && currentStep !== "finished" && (
-        <View
-          style={[
-            tw`absolute top-15 bg-transparent left-4 z-50 flex flex-row px-3`,
-          ]}
-        >
-          <TouchableOpacity
-            onPress={() => navigation.navigate("MainDrawer")}
-            style={tw`bg-gray-50 p-3 mt-1 w-12 h-12 rounded-full shadow-lg mr-3`}
+      {currentStep !== "confirm" &&
+        currentStep !== "finished" &&
+        searching === false && (
+          <View
+            style={[
+              tw`absolute top-15 bg-transparent left-4 z-50 flex flex-row px-3`,
+            ]}
           >
-            <Entypo name="menu" size={25} />
-          </TouchableOpacity>
-        </View>
-      )}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("MainDrawer")}
+              style={tw`bg-gray-50 p-3 mt-1 w-12 h-12 rounded-full shadow-lg mr-3`}
+            >
+              <Entypo name="menu" size={25} />
+            </TouchableOpacity>
+          </View>
+        )}
 
       {currentStep == "home" && (
         <HomeMap
@@ -381,6 +383,7 @@ const MapHomeScreen = () => {
           originText={originText}
           handleOrigin={setoriginText}
           handleSearch={handleSearch}
+          searching={searching}
         />
       )}
       {currentStep == "confirm" && (

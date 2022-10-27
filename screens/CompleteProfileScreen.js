@@ -7,6 +7,7 @@ import {
   View,
   ScrollView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
@@ -35,6 +36,7 @@ const CompleteProfileScreen = () => {
   const [currentStep, setcurrentStep] = useState("step1");
   const [email, setemail] = useState("");
   const [fullName, setfullName] = useState("");
+  const [saving, setsaving] = useState(false);
 
   const [showerror, setshowerror] = useState(undefined);
 
@@ -81,6 +83,7 @@ const CompleteProfileScreen = () => {
     if (currentStep === "step2") {
       setcurrentStep("step3");
     } else {
+      setsaving(true);
       setDoc(
         doc(db, "clients", userinfo.phone),
         {
@@ -137,6 +140,7 @@ const CompleteProfileScreen = () => {
   const storeUser = async (value) => {
     try {
       await AsyncStorage.setItem("Client", JSON.stringify(value));
+      setsaving(false);
       navigation.navigate("HomeScreen");
       navigation.reset({
         index: 0,
@@ -167,189 +171,211 @@ const CompleteProfileScreen = () => {
   }, [mainGroup]);
 
   return (
-    <KeyboardAvoidingView
-      style={[tw`w-screen mr-5`, styles.container]}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-    >
-      <View style={[tw`rounded-full`, styles.ellipse1]} />
-      <View style={[tw`rounded-full`, styles.ellipse2]} />
-      <TouchableOpacity style={styles.flesh} onPress={handleReturn}>
-        <AntDesign name="arrowleft" size={20} color={"#ffff"} />
-      </TouchableOpacity>
-      {currentStep === "step1" && (
-        <>
-          <View style={[styles.styleSEnregistrer, tw`mb-5`]}>
-            <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 30 }}>
-              S'enregistrer
-            </Text>
-          </View>
+    <>
+      {!saving && (
+        <KeyboardAvoidingView
+          style={[tw`w-screen mr-5`, styles.container]}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <View style={[tw`rounded-full`, styles.ellipse1]} />
+          <View style={[tw`rounded-full`, styles.ellipse2]} />
+          <TouchableOpacity style={styles.flesh} onPress={handleReturn}>
+            <AntDesign name="arrowleft" size={20} color={"#ffff"} />
+          </TouchableOpacity>
+          {currentStep === "step1" && (
+            <>
+              <View style={[styles.styleSEnregistrer, tw`mb-5`]}>
+                <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 30 }}>
+                  S'enregistrer
+                </Text>
+              </View>
 
-          <View style={styles.inputContainer}>
-            <TextInputs
-              placeHolder={"Nom et prénom"}
-              value={fullName}
-              onChangeText={setfullName}
-              iconName="user"
-            />
-            <TextInputs
-              placeHolder={"Email"}
-              value={email}
-              onChangeText={setemail}
-              iconName="mail"
-            />
-          </View>
-          {showerror && (
-            <View style={[styles.styleSEnregistrer, tw`mt-5 px-2`]}>
-              <Text
-                style={{
-                  fontFamily: "Poppins-Regular",
-                  fontSize: 14,
-                  color: "#F74C00",
-                }}
-              >
-                {showerror.text}
-              </Text>
+              <View style={styles.inputContainer}>
+                <TextInputs
+                  placeHolder={"Nom et prénom"}
+                  value={fullName}
+                  onChangeText={setfullName}
+                  iconName="user"
+                />
+                <TextInputs
+                  placeHolder={"Email"}
+                  value={email}
+                  onChangeText={setemail}
+                  iconName="mail"
+                />
+              </View>
+              {showerror && (
+                <View style={[styles.styleSEnregistrer, tw`mt-5 px-2`]}>
+                  <Text
+                    style={{
+                      fontFamily: "Poppins-Regular",
+                      fontSize: 14,
+                      color: "#F74C00",
+                    }}
+                  >
+                    {showerror.text}
+                  </Text>
+                </View>
+              )}
+              <NextBtn text={"Continuer"} onClick={handleStep1Click} />
+            </>
+          )}
+          {currentStep === "step2" && (
+            <View style={tw`w-full ml-[15%]`}>
+              <DatePicker onSelect={setcurrentDate} />
+              <PickerList
+                title="Lieu de résidence principal"
+                selectedValue={selectedGov}
+                setSelectedLanguage={setselectedGov}
+                items={gouvernorats}
+              />
+              <PickerList
+                selectedValue={selectedVille}
+                setSelectedLanguage={setselectedVille}
+                items={ville}
+              />
+              <Input
+                placeHolder="Code postal"
+                value={codePostal}
+                onChangeText={setcodePostal}
+              />
             </View>
           )}
-          <NextBtn text={"Continuer"} onClick={handleStep1Click} />
-        </>
-      )}
-      {currentStep === "step2" && (
-        <View style={tw`w-full ml-[15%]`}>
-          <DatePicker onSelect={setcurrentDate} />
-          <PickerList
-            title="Lieu de résidence principal"
-            selectedValue={selectedGov}
-            setSelectedLanguage={setselectedGov}
-            items={gouvernorats}
-          />
-          <PickerList
-            selectedValue={selectedVille}
-            setSelectedLanguage={setselectedVille}
-            items={ville}
-          />
-          <Input
-            placeHolder="Code postal"
-            value={codePostal}
-            onChangeText={setcodePostal}
-          />
-        </View>
-      )}
-      {currentStep === "step3" && (
-        <ScrollView
-          style={tw`w-screen  pt-[170]`}
-          contentContainerStyle={tw`flex justify-center items-center`}
-        >
-          <Text
-            style={{
-              width: "80%",
-              fontFamily: "Poppins-Regular",
-              fontSize: 15,
-              lineHeight: 30,
-            }}
-          >
-            En précisant votre fréquence d'utilisation des taxis vous pouvez
-            recevoir un service adapté à vos besoins et plusieurs avantages :
-          </Text>
+          {currentStep === "step3" && (
+            <ScrollView
+              style={tw`w-screen  pt-[170]`}
+              contentContainerStyle={tw`flex justify-center items-center`}
+            >
+              <Text
+                style={{
+                  width: "80%",
+                  fontFamily: "Poppins-Regular",
+                  fontSize: 15,
+                  lineHeight: 30,
+                }}
+              >
+                En précisant votre fréquence d'utilisation des taxis vous pouvez
+                recevoir un service adapté à vos besoins et plusieurs avantages
+                :
+              </Text>
 
-          <View
-            style={tw`w-full flex justify-center items-start ml-[15%] mt-[5%]`}
-          >
-            <RadioButtons
-              title="Régulierement"
-              value="Régulierement"
-              onSelect={setmainGroup}
-              state={mainGroup}
-              disabled={false}
-            />
+              <View
+                style={tw`w-full flex justify-center items-start ml-[15%] mt-[5%]`}
+              >
+                <RadioButtons
+                  title="Régulierement"
+                  value="Régulierement"
+                  onSelect={setmainGroup}
+                  state={mainGroup}
+                  disabled={false}
+                />
+                <View
+                  style={tw`w-full flex justify-center items-start ml-[5%] my-2`}
+                >
+                  <RadioButtons
+                    title="Quotidienne"
+                    value="Quotidienne"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={firstGroupDisabled}
+                  />
+                  <RadioButtons
+                    title="Hébdomadaire"
+                    value="Hébdomadaire"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={firstGroupDisabled}
+                  />
+                  <RadioButtons
+                    title="Mensuel"
+                    value="Mensuel"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={firstGroupDisabled}
+                  />
+                </View>
+                <RadioButtons
+                  title="Irrégulierement"
+                  value="Irrégulierement"
+                  onSelect={setmainGroup}
+                  state={mainGroup}
+                  disabled={false}
+                />
+                <View
+                  style={tw`w-full flex justify-center items-start ml-[5%] my-2`}
+                >
+                  <RadioButtons
+                    title="Très souvent"
+                    value="Très souvent"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={secondGroupDisabled}
+                  />
+                  <RadioButtons
+                    title="Assez souvent"
+                    value="Assez souvent"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={secondGroupDisabled}
+                  />
+                  <RadioButtons
+                    title="Pas souvent"
+                    value="Pas souvent"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={secondGroupDisabled}
+                  />
+                  <RadioButtons
+                    title="Rarement"
+                    value="Rarement"
+                    onSelect={setsubGroup}
+                    state={subGroup}
+                    disabled={secondGroupDisabled}
+                  />
+                </View>
+              </View>
+            </ScrollView>
+          )}
+          {currentStep !== "step1" && (
             <View
-              style={tw`w-full flex justify-center items-start ml-[5%] my-2`}
+              style={tw`absolute bottom-3 w-screen flex flex-row justify-between px-8 `}
             >
-              <RadioButtons
-                title="Quotidienne"
-                value="Quotidienne"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={firstGroupDisabled}
-              />
-              <RadioButtons
-                title="Hébdomadaire"
-                value="Hébdomadaire"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={firstGroupDisabled}
-              />
-              <RadioButtons
-                title="Mensuel"
-                value="Mensuel"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={firstGroupDisabled}
-              />
+              <TouchableOpacity
+                style={tw`rounded-full bg-[#fff] w-45%  p-4 flex justify-center items-center`}
+                onPress={handleNext}
+              >
+                <Text style={[styles.btn, styles.ignore]}>Ignorer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  tw`rounded-full bg-[#431879] w-45%   p-4 flex justify-center items-center`,
+                ]}
+                onPress={handleNext}
+              >
+                <Text style={[styles.btn, styles.next]}>Suivant</Text>
+              </TouchableOpacity>
             </View>
-            <RadioButtons
-              title="Irrégulierement"
-              value="Irrégulierement"
-              onSelect={setmainGroup}
-              state={mainGroup}
-              disabled={false}
-            />
-            <View
-              style={tw`w-full flex justify-center items-start ml-[5%] my-2`}
-            >
-              <RadioButtons
-                title="Très souvent"
-                value="Très souvent"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={secondGroupDisabled}
-              />
-              <RadioButtons
-                title="Assez souvent"
-                value="Assez souvent"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={secondGroupDisabled}
-              />
-              <RadioButtons
-                title="Pas souvent"
-                value="Pas souvent"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={secondGroupDisabled}
-              />
-              <RadioButtons
-                title="Rarement"
-                value="Rarement"
-                onSelect={setsubGroup}
-                state={subGroup}
-                disabled={secondGroupDisabled}
-              />
-            </View>
-          </View>
-        </ScrollView>
+          )}
+        </KeyboardAvoidingView>
       )}
-      {currentStep !== "step1" && (
-        <View
-          style={tw`absolute bottom-3 w-screen flex flex-row justify-between px-8 `}
-        >
-          <TouchableOpacity
-            style={tw`rounded-full bg-[#fff] w-45%  p-4 flex justify-center items-center`}
-            onPress={handleNext}
-          >
-            <Text style={[styles.btn, styles.ignore]}>Ignorer</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+      {saving && (
+        <View style={tw`h-screen w-screen`}>
+          <View
             style={[
-              tw`rounded-full bg-[#431879] w-45%   p-4 flex justify-center items-center`,
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: "#000000",
+                justifyContent: "center",
+                opacity: 0.6,
+              },
+              tw`h-screen flex justify-center items-center`,
             ]}
-            onPress={handleNext}
           >
-            <Text style={[styles.btn, styles.next]}>Suivant</Text>
-          </TouchableOpacity>
+            <ActivityIndicator size={80} color="#F74C00" />
+          </View>
         </View>
       )}
-    </KeyboardAvoidingView>
+    </>
   );
 };
 

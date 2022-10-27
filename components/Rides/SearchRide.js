@@ -23,7 +23,7 @@ const SearchRide = ({ onClick }) => {
     >
       <CarSvg />
       <View style={tw`my-2`} />
-      <ActivityIndicator size={"large"} color="#431879" />
+      <ActivityIndicator size={"small"} color="#431879" />
       <Text
         style={[tw`mt-3`, { fontFamily: "Poppins-SemiBold", fontSize: 18 }]}
       >
