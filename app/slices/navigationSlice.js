@@ -6,6 +6,8 @@ const initialState = {
   travelTimeInfo: null,
   currentLocation: "Waiting..",
   currentUser: null,
+  driverLocation: null,
+  userInfo: null,
 };
 
 export const navigationSlice = createSlice({
@@ -27,6 +29,12 @@ export const navigationSlice = createSlice({
     setCurrentUser: (state, action) => {
       state.currentUser = action.payload;
     },
+    setDriverLocation: (state, action) => {
+      state.driverLocation = action.payload;
+    },
+    setUserInfo: (state, action) => {
+      state.userInfo = action.payload;
+    },
   },
 });
 
@@ -36,12 +44,16 @@ export const {
   setTravelTimeInfo,
   setCurrentLocation,
   setCurrentUser,
+  setDriverLocation,
+  setUserInfo,
 } = navigationSlice.actions;
 
 export const selectOrigin = (state) => state.navigation.origin;
 export const selectDestination = (state) => state.navigation.destination;
 export const selectTravelTimeInfo = (state) => state.navigation.travelTimeInfo;
 export const selectCurrentUser = (state) => state.navigation.currentUser;
+export const selectUserInfo = (state) => state.navigation.userInfo;
+export const selectDriverLocation = (state) => state.navigation.driverLocation;
 export const selectCurrentLocation = (state) =>
   state.navigation.currentLocation;
 
