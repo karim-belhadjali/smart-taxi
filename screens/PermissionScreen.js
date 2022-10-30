@@ -33,7 +33,6 @@ export default function App() {
   const navigation = useNavigation();
 
   const [reload, setreload] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
   const dispatch = useDispatch();
   useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins/Poppins-Black.ttf"),
@@ -83,11 +82,10 @@ export default function App() {
               await getUser("Client");
             })
             .catch((e) => {
-              setErrorMsg(e.message);
+              setreload(!reload);
             });
         }
       } else {
-        setErrorMsg("No Internet Connection is detected please try again");
         Alert.alert(
           "Connexion Internet non détectée",
           "Aucune connexion Internet n'est détectée, veuillez réessayer",

@@ -1,5 +1,5 @@
 import React from "react";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import tw from "twrnc";
 import NavFavourites from "../components/NavFavourites";
 const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
@@ -13,7 +13,6 @@ const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
           longitudeDelta: 0.005,
         }}
         mapType="mutedStandard"
-        provider="google"
         style={tw`w-screen h-[60%]`}
         zoomEnabled={true}
       >

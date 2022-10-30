@@ -16,12 +16,12 @@ const NavFavourites = ({ onSearch, recents }) => {
       style={[
         tw`bg-[#FFFFFF] w-screen h-[40%] rounded-t-2xl p-4 flex items-center`,
         {
-          shadowRadius: 100,
-          shadowOpacity: 0.8,
+          shadowRadius: 20,
+          shadowOpacity: 0.18,
           shadowColor: "#171717",
           shadowOffset: {
             width: -11,
-            height: -50,
+            height: -5,
           },
           elevation: 50,
         },
@@ -37,8 +37,17 @@ const NavFavourites = ({ onSearch, recents }) => {
       </View>
       <TouchableOpacity
         style={[
-          tw`rounded-2xl w-92% bg-white h-13 flex flex-row items-center px-4`,
-          { elevation: 5 },
+          tw`rounded-2xl w-92% bg-white h-13 flex flex-row items-center px-4 mt-1`,
+          {
+            shadowRadius: 5,
+            shadowOpacity: 0.18,
+            shadowColor: "#171717",
+            shadowOffset: {
+              width: -11,
+              height: -0.5,
+            },
+            elevation: 5,
+          },
         ]}
         onPress={onSearch}
       >

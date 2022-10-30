@@ -8,7 +8,6 @@ import {
   Platform,
   KeyboardAvoidingView,
   StatusBar,
-  Image,
   ActivityIndicator,
 } from "react-native";
 import { signInAnonymously } from "firebase/auth";
@@ -34,8 +33,7 @@ const LoginScreen = () => {
   const code3 = useRef();
   const code1 = useRef();
   const code4 = useRef();
-  const code5 = useRef();
-  const code6 = useRef();
+  const tel = useRef();
 
   const statusbarheight = StatusBar.currentHeight;
   // Phone State management hooks
@@ -265,12 +263,18 @@ const LoginScreen = () => {
                 </View>
                 <View style={tw`h-full border-[0.15] mx-6 `} />
                 <TextInput
+                  ref={tel}
                   style={[tw`mr-12 w-[40]`, styles.numbers]}
                   placeholder="Num téléphone"
                   autoCompleteType="tel"
-                  keyboardType="phone-pad"
+                  keyboardType="numeric"
                   textContentType="telephoneNumber"
-                  onChangeText={(phoneNumber) => setPhoneNumber(phoneNumber)}
+                  onChangeText={(phoneNumber) => {
+                    setPhoneNumber(phoneNumber);
+                    if (phoneNumber.length === 8) {
+                      tel.current.blur();
+                    }
+                  }}
                   onFocus={() => setphonebordercolor("#FAC100")}
                   onBlur={() => setphonebordercolor("#431879")}
                 />
@@ -306,8 +310,12 @@ const LoginScreen = () => {
                   Modifier mon numéro
                 </Text>
                 <View style={[tw`flex-row w-full px-3 mt-4  justify-evenly`]}>
-                  <View
+                  <TouchableOpacity
                     style={tw`border border-[${border1}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    activeOpacity={1}
+                    onPress={() => {
+                      code1.current.focus();
+                    }}
                   >
                     <TextInput
                       ref={code1}
@@ -332,9 +340,13 @@ const LoginScreen = () => {
                       }}
                       maxLength={1}
                     />
-                  </View>
-                  <View
-                    style={tw`border border-[${border2}] rounded-lg mx-1 w-18  h-[13] flex justify-center items-center `}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={tw`border border-[${border2}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    activeOpacity={1}
+                    onPress={() => {
+                      code2.current.focus();
+                    }}
                   >
                     <TextInput
                       ref={code2}
@@ -360,9 +372,13 @@ const LoginScreen = () => {
                       }}
                       maxLength={1}
                     />
-                  </View>
-                  <View
-                    style={tw`border border-[${border3}] rounded-lg mx-1 w-18   h-[13] flex justify-center items-center `}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={tw`border border-[${border3}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    activeOpacity={1}
+                    onPress={() => {
+                      code3.current.focus();
+                    }}
                   >
                     <TextInput
                       ref={code3}
@@ -388,9 +404,13 @@ const LoginScreen = () => {
                       }}
                       maxLength={1}
                     />
-                  </View>
-                  <View
+                  </TouchableOpacity>
+                  <TouchableOpacity
                     style={tw`border border-[${border4}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    activeOpacity={1}
+                    onPress={() => {
+                      code4.current.focus();
+                    }}
                   >
                     <TextInput
                       ref={code4}
@@ -416,7 +436,7 @@ const LoginScreen = () => {
                       }}
                       maxLength={1}
                     />
-                  </View>
+                  </TouchableOpacity>
                 </View>
                 {error && (
                   <Text

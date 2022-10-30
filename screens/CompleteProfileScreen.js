@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  StatusBar,
   ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
@@ -27,6 +26,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUserInfo, setCurrentUser } from "../app/slices/navigationSlice";
 import { doc, setDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "expo-status-bar";
 
 const CompleteProfileScreen = () => {
   const navigation = useNavigation();
@@ -53,8 +53,6 @@ const CompleteProfileScreen = () => {
 
   const gouvernorats = ["ben arous", "ariana", "mannouba"];
   const ville = ["Hammem-lif", "ezzahra", "rades"];
-
-  const statusBarHeight = StatusBar.currentHeight;
 
   const handleStep1Click = () => {
     if (
@@ -375,6 +373,7 @@ const CompleteProfileScreen = () => {
           </View>
         </View>
       )}
+      <StatusBar style="light" />
     </>
   );
 };
@@ -389,18 +388,18 @@ const styles = StyleSheet.create({
   },
   ellipse2: {
     position: "absolute",
-    left: 159,
-    top: -164,
+    left: -33,
+    top: -158,
     backgroundColor: "#431879B8",
     width: 283,
     height: 283,
   },
   ellipse1: {
     position: "absolute",
-    left: -33,
-    top: -126,
+    left: 159,
+    top: -130,
     backgroundColor: "#431879",
-    opacity: 0.9,
+
     width: 283,
     height: 283,
   },

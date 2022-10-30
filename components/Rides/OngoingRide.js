@@ -14,12 +14,12 @@ const OngoingRide = ({ ride, onNext }) => {
       style={[
         tw`bg-[#FFFFFF] absolute bottom-0 w-screen h-[35%] rounded-t-2xl p-4 flex items-center`,
         {
-          shadowRadius: 100,
-          shadowOpacity: 0.8,
+          shadowRadius: 20,
+          shadowOpacity: 0.18,
           shadowColor: "#171717",
           shadowOffset: {
             width: -11,
-            height: -50,
+            height: -5,
           },
           elevation: 50,
         },

@@ -5,7 +5,7 @@ import tw from "twrnc";
 const NextBtn = ({ text, onClick }) => {
   return (
     <TouchableOpacity
-      style={tw`absolute bottom-3 rounded-full bg-[#431879] w-[80]  p-4 flex justify-center items-center`}
+      style={tw`absolute android:bottom-3 ios:bottom-10 rounded-full bg-[#431879] w-[80]  p-4 flex justify-center items-center`}
       onPress={onClick}
     >
       <Text style={styles.btn}>{text}</Text>

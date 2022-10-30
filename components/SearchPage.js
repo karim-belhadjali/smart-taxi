@@ -7,6 +7,7 @@ import {
   FlatList,
   KeyboardAvoidingView,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import DestinationSvg from "../assets/svg/destinationSvg";
@@ -52,139 +53,139 @@ const SearchPage = ({
 
   return (
     <>
-      <KeyboardAvoidingView
-        style={[
-          tw`flex flex-1 items-center w-screen h-screen bg-[#E5E5E5]`,
-          { zIndex: 100 },
-        ]}
-      >
-        <View key={"titleView"} style={tw`flex flex-row w-[90%] mt-2`}>
-          <TouchableOpacity style={styles.flesh} onPress={handleback}>
-            <AntDesign
-              name="arrowleft"
-              style={tw`mt-[6] mr-5`}
-              size={25}
-              color={"#4F4F4F"}
-            />
-          </TouchableOpacity>
-          <Text
+      <SafeAreaView style={tw`h-screen bg-white`}>
+        <KeyboardAvoidingView
+          style={[tw`flex flex-1 items-center w-screen h-full bg-white `]}
+        >
+          <View key={"titleView"} style={tw`flex flex-row w-[90%] mt-2`}>
+            <TouchableOpacity style={styles.flesh} onPress={handleback}>
+              <AntDesign
+                name="arrowleft"
+                style={tw`mt-[6] mr-5`}
+                size={25}
+                color={"#4F4F4F"}
+              />
+            </TouchableOpacity>
+            <Text
+              style={[
+                tw` flex-1 ml-2`,
+                {
+                  fontFamily: "Poppins-SemiBold",
+                  letterSpacing: 0.3,
+                  fontSize: 20,
+                },
+              ]}
+            >
+              Entrer votre destination
+            </Text>
+          </View>
+          <View
+            key={"restOfThePage"}
             style={[
-              tw` flex-1 ml-2`,
-              {
-                fontFamily: "Poppins-SemiBold",
-                letterSpacing: 0.3,
-                fontSize: 20,
-              },
+              tw`absolute w-screen top-[6%] left-0 bg-transparent z-50  flex `,
             ]}
           >
-            Entrer votre destination
-          </Text>
-        </View>
-        <View
-          key={"restOfThePage"}
-          style={[
-            tw`absolute w-screen top-[6%] left-0 bg-transparent z-50  flex `,
-          ]}
-        >
-          <View key={"searchView"} style={tw`flex flex-row items-center`}>
-            <View style={tw`ml-5 mr-5`}>
-              <DestinationSvg />
-            </View>
-
-            <View style={tw`m-2 bg-transparent w-[70%]`} focusable={true}>
-              <View style={[tw``, toInputBoxStyles.container]}>
-                <Text style={tw`ml-[10] opacity-50`}>Votre emplacement</Text>
+            <View key={"searchView"} style={tw`flex flex-row items-center`}>
+              <View style={tw`ml-5 mr-5`}>
+                <DestinationSvg />
               </View>
-              <GooglePlacesAutocomplete
-                placeholder="Où voulez-vous aller?"
-                debounce={400}
-                fetchDetails={true}
-                enablePoweredByContainer={false}
-                nearbyPlacesAPI="GooglePlacesSearch"
-                query={{
-                  key: GOOGLE_MAPS_API_KEY,
-                  language: "en",
-                  components: "country:tn",
-                }}
-                textInputProps={{
-                  value: destinationText,
-                  onChange: (e) => {
-                    handledestination(e.target.value);
-                  },
-                }}
-                styles={toInputBoxStyle2}
-                onPress={(data, details = null) => {
-                  dispatch(
-                    setDestination({
-                      location: details?.geometry.location,
-                      description: data.description,
-                    })
-                  );
-                  handledestination(data.description);
-                  // navigation.navigate("RideOptionsCard");
-                }}
-              />
-            </View>
-          </View>
-          <View
-            key={"separator"}
-            style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-screen`}
-          />
-          <View
-            key={"add home"}
-            style={tw`w-screen flex  justify-center items-center mt-1`}
-          >
-            <View style={tw`flex flex-row w-full justify-start items-center`}>
-              <AntDesign
-                name="home"
-                style={tw`mt-2 ml-5 opacity-30`}
-                size={20}
-                color={"#4F4F4F"}
-              />
-              <Text
-                style={[
-                  tw`opacity-30 mx-8 mt-3`,
-                  { fontFamily: "Poppins-Regular", fontSize: 15 },
-                ]}
-              >
-                Ajouter Domicile
-              </Text>
-            </View>
-            <View
-              key={"separator"}
-              style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-[90%]`}
-            />
-          </View>
-          <View
-            key={"add work"}
-            style={tw`w-screen flex  justify-center items-center mt-1`}
-          >
-            <View style={tw`flex flex-row w-full justify-start items-center `}>
-              <Entypo
-                name="suitcase"
-                style={tw`mt-2 ml-5 opacity-30`}
-                size={20}
-                color={"#4F4F4F"}
-              />
-              <Text
-                style={[
-                  tw`opacity-30 mx-8 mt-3`,
-                  { fontFamily: "Poppins-Regular", fontSize: 15 },
-                ]}
-              >
-                Ajouter Travail
-              </Text>
-            </View>
-            <View
-              key={"separator"}
-              style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-[90%]`}
-            />
-          </View>
-        </View>
 
+              <View style={tw`m-2 bg-transparent w-[70%]`} focusable={true}>
+                <View style={[tw``, toInputBoxStyles.container]}>
+                  <Text style={tw`ml-[10] opacity-50`}>Votre emplacement</Text>
+                </View>
+                <GooglePlacesAutocomplete
+                  placeholder="Où voulez-vous aller?"
+                  debounce={400}
+                  fetchDetails={true}
+                  enablePoweredByContainer={false}
+                  nearbyPlacesAPI="GooglePlacesSearch"
+                  query={{
+                    key: GOOGLE_MAPS_API_KEY,
+                    language: "en",
+                    components: "country:tn",
+                  }}
+                  textInputProps={{
+                    value: destinationText,
+                    onChange: (e) => {
+                      handledestination(e.target.value);
+                    },
+                  }}
+                  styles={toInputBoxStyle2}
+                  onPress={(data, details = null) => {
+                    dispatch(
+                      setDestination({
+                        location: details?.geometry.location,
+                        description: data.description,
+                      })
+                    );
+                    handledestination(data.description);
+                    // navigation.navigate("RideOptionsCard");
+                  }}
+                />
+              </View>
+            </View>
+            <View
+              key={"separator"}
+              style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-screen`}
+            />
+            <View
+              key={"add home"}
+              style={tw`w-screen flex  justify-center items-center mt-1`}
+            >
+              <View style={tw`flex flex-row w-full justify-start items-center`}>
+                <AntDesign
+                  name="home"
+                  style={tw`mt-2 ml-5 opacity-30`}
+                  size={20}
+                  color={"#4F4F4F"}
+                />
+                <Text
+                  style={[
+                    tw`opacity-30 mx-8 mt-3`,
+                    { fontFamily: "Poppins-Regular", fontSize: 15 },
+                  ]}
+                >
+                  Ajouter Domicile
+                </Text>
+              </View>
+              <View
+                key={"separator"}
+                style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-[90%]`}
+              />
+            </View>
+            <View
+              key={"add work"}
+              style={tw`w-screen flex  justify-center items-center mt-1`}
+            >
+              <View
+                style={tw`flex flex-row w-full justify-start items-center `}
+              >
+                <Entypo
+                  name="suitcase"
+                  style={tw`mt-2 ml-5 opacity-30`}
+                  size={20}
+                  color={"#4F4F4F"}
+                />
+                <Text
+                  style={[
+                    tw`opacity-30 mx-8 mt-3`,
+                    { fontFamily: "Poppins-Regular", fontSize: 15 },
+                  ]}
+                >
+                  Ajouter Travail
+                </Text>
+              </View>
+              <View
+                key={"separator"}
+                style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-[90%]`}
+              />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
         {destination && (
           <TouchableOpacity
-            style={tw`absolute w-screen flex items-center justify-center bottom-2`}
+            style={tw`absolute w-screen flex items-center justify-center bottom-2 ios:bottom-5`}
             onPress={() => {
               handleSearch();
             }}
@@ -213,7 +214,7 @@ const SearchPage = ({
             </View>
           </TouchableOpacity>
         )}
-      </KeyboardAvoidingView>
+      </SafeAreaView>
       {searching && (
         <View style={tw`h-screen w-screen`}>
           <View

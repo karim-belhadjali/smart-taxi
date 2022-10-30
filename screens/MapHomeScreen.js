@@ -1,15 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
   StatusBar,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Button,
-  ActivityIndicator,
-  FlatList,
 } from "react-native";
 import {
   selectDestination,
@@ -26,31 +21,19 @@ import {
   setDriverLocation,
   selectTravelTimeInfo,
 } from "../app/slices/navigationSlice";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
 import EvilIcons from "react-native-vector-icons/EvilIcons";
 
 import MapView, { Marker } from "react-native-maps";
 
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapViewDirections from "react-native-maps-directions";
 
-import { auth, functions, httpsCallable, db } from "../firebase";
-import {
-  query,
-  onSnapshot,
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-} from "firebase/firestore";
-import { LogBox } from "react-native";
+import { db } from "../firebase";
+import { onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
 
 import tw from "twrnc";
-const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
 
-import Svg, { Path } from "react-native-svg";
-import NavFavourites from "../components/NavFavourites";
+const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
 
 import SearchPage from "../components/SearchPage";
 import HomeMap from "../components/HomeMap";
@@ -63,10 +46,6 @@ import { useNavigation } from "@react-navigation/core";
 
 const MapHomeScreen = () => {
   const navigation = useNavigation();
-  LogBox.ignoreLogs([
-    "TypeError: undefined is not an object (evaluating 'request.driverInfo.name')",
-  ]);
-
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
@@ -84,7 +63,6 @@ const MapHomeScreen = () => {
   const [currentRide, setcurrentRide] = useState(null);
 
   const [currentLocationActive, setcurrentLocationActive] = useState(true);
-  const [destinationDispaly, setdestinationDispaly] = useState(false);
   const [destinationText, setdestinationText] = useState("");
   const [originText, setoriginText] = useState();
   const [searching, setsearching] = useState(false);
@@ -106,13 +84,14 @@ const MapHomeScreen = () => {
   }, [origin, destination]);
 
   useEffect(() => {
-    if (!origin || !destination || currentStep !== "confirm") return;
     setTimeout(() => {
       mapRef?.current?.fitToSuppliedMarkers(["origin", "destination"], {
         edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
         duration: 1000,
       });
     }, 300);
+
+    if (!origin || !destination || currentStep !== "confirm") return;
   }, [currentStep]);
 
   useEffect(() => {
@@ -347,6 +326,7 @@ const MapHomeScreen = () => {
     >
       {currentStep !== "confirm" &&
         currentStep !== "finished" &&
+        currentStep !== "search" &&
         searching === false && (
           <View
             style={[
@@ -407,7 +387,7 @@ const MapHomeScreen = () => {
                 destination={`${destination.location.lat},${destination.location.lng}`}
                 apikey={GOOGLE_MAPS_API_KEY}
                 strokeWidth={3}
-                strokeColor="blue"
+                strokeColor="#F74C00"
                 lineDashPattern={[0]}
               />
             )}
@@ -417,7 +397,7 @@ const MapHomeScreen = () => {
                 destination={`${driverLocation.location.lat},${driverLocation.location.lng}`}
                 apikey={GOOGLE_MAPS_API_KEY}
                 strokeWidth={5}
-                strokeColor="red"
+                strokeColor="#F74C00"
                 lineDashPattern={[0]}
               />
             )}
@@ -456,7 +436,7 @@ const MapHomeScreen = () => {
                 description={driverLocation.description}
                 identifier="driver"
               >
-                <EvilIcons size={50} name="location" color="#8B8000" />
+                {/* <EvilIcons size={50} name="location" color="#8B8000" /> */}
               </Marker>
             )}
             {origin?.location && (

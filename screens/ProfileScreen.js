@@ -87,7 +87,9 @@ const ProfileScreen = () => {
           </Text>
         </View>
       )}
-      <View style={tw`absolute bottom-20 w-full flex justify-center`}>
+      <View
+        style={tw`absolute bottom-18 w-full flex justify-center ios:bottom-30`}
+      >
         <View style={tw`bg-[#000000] opacity-10 h-[.45] w-full mt-5`} />
         <TouchableOpacity
           style={tw`flex flex-row ml-5 mt-5`}

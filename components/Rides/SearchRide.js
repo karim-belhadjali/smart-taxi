@@ -10,12 +10,12 @@ const SearchRide = ({ onClick }) => {
       style={[
         tw`bg-[#FFFFFF] w-screen h-[40%] rounded-t-2xl px-4 py-2 flex justify-center items-center`,
         {
-          shadowRadius: 100,
-          shadowOpacity: 0.8,
+          shadowRadius: 20,
+          shadowOpacity: 0.18,
           shadowColor: "#171717",
           shadowOffset: {
             width: -11,
-            height: -50,
+            height: -5,
           },
           elevation: 50,
         },
