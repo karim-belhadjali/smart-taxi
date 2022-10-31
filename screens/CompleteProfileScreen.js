@@ -7,6 +7,7 @@ import {
   View,
   ScrollView,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
@@ -52,7 +53,31 @@ const CompleteProfileScreen = () => {
   const [secondGroupDisabled, setsecondGroupDisabled] = useState(true);
 
   const gouvernorats = ["ben arous", "ariana", "mannouba"];
+  const govs = [
+    { key: 1, section: true, label: "Fruits" },
+    { key: 2, label: "Red Apples" },
+    { key: 3, label: "Cherries" },
+    { key: 4, label: "Cranberries" },
+    { key: 5, label: "Pink Grapefruit" },
+    { key: 6, label: "Raspberries" },
+    { key: 8, label: "Beets" },
+    { key: 9, label: "Red Peppers" },
+    { key: 7, label: "Radishes" },
+    { key: 41, label: "Red Onions" },
+  ];
   const ville = ["Hammem-lif", "ezzahra", "rades"];
+  const villes = [
+    { key: 1, section: true, label: "Fruits" },
+    { key: 2, label: "Red Apples" },
+    { key: 3, label: "Cherries" },
+    { key: 4, label: "Cranberries" },
+    { key: 5, label: "Pink Grapefruit" },
+    { key: 6, label: "Raspberries" },
+    { key: 8, label: "Beets" },
+    { key: 9, label: "Red Peppers" },
+    { key: 7, label: "Radishes" },
+    { key: 41, label: "Red Onions" },
+  ];
 
   const handleStep1Click = () => {
     if (
@@ -220,23 +245,48 @@ const CompleteProfileScreen = () => {
           )}
           {currentStep === "step2" && (
             <View style={tw`w-full ml-[15%]`}>
-              <DatePicker onSelect={setcurrentDate} />
-              <PickerList
-                title="Lieu de résidence principal"
-                selectedValue={selectedGov}
-                setSelectedLanguage={setselectedGov}
-                items={gouvernorats}
-              />
-              <PickerList
-                selectedValue={selectedVille}
-                setSelectedLanguage={setselectedVille}
-                items={ville}
-              />
-              <Input
-                placeHolder="Code postal"
-                value={codePostal}
-                onChangeText={setcodePostal}
-              />
+              {Platform.OS === "android" && (
+                <>
+                  <DatePicker onSelect={setcurrentDate} />
+                  <PickerList
+                    title="Lieu de résidence principal"
+                    selectedValue={selectedGov}
+                    setSelectedLanguage={setselectedGov}
+                    items={gouvernorats}
+                  />
+                  <PickerList
+                    selectedValue={selectedVille}
+                    setSelectedLanguage={setselectedVille}
+                    items={ville}
+                  />
+                  <Input
+                    placeHolder="Code postal"
+                    value={codePostal}
+                    onChangeText={setcodePostal}
+                  />
+                </>
+              )}
+              {Platform.OS !== "android" && (
+                <>
+                  <DatePicker onSelect={setcurrentDate} />
+                  <PickerList
+                    title="Lieu de résidence principal"
+                    selectedValue={"Gouvernorat"}
+                    setSelectedLanguage={setselectedGov}
+                    items={govs}
+                  />
+                  <PickerList
+                    selectedValue={"Ville"}
+                    setSelectedLanguage={setselectedVille}
+                    items={villes}
+                  />
+                  <Input
+                    placeHolder="Code postal"
+                    value={codePostal}
+                    onChangeText={setcodePostal}
+                  />
+                </>
+              )}
             </View>
           )}
           {currentStep === "step3" && (
@@ -336,7 +386,7 @@ const CompleteProfileScreen = () => {
           )}
           {currentStep !== "step1" && (
             <View
-              style={tw`absolute bottom-3 w-screen flex flex-row justify-between px-8 `}
+              style={tw`absolute bottom-3 ios:bottom-10 w-screen flex flex-row justify-between px-8 `}
             >
               <TouchableOpacity
                 style={tw`rounded-full bg-[#fff] w-45%  p-4 flex justify-center items-center`}

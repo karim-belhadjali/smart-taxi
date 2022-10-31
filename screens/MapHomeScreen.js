@@ -43,6 +43,8 @@ import WaitingRide from "../components/Rides/WaitingRide";
 import OngoingRide from "../components/Rides/OngoingRide";
 import FinishedPage from "../components/FinishedPage";
 import { useNavigation } from "@react-navigation/core";
+import MapCarSvg from "../assets/svg/MapCarSvg";
+import UserLocationSvg from "../assets/svg/UserLocationSvg";
 
 const MapHomeScreen = () => {
   const navigation = useNavigation();
@@ -140,6 +142,8 @@ const MapHomeScreen = () => {
       setsearching(true);
       let distance = parseFloat(travelTimeInfo.distance.text);
       let duration = travelTimeInfo.duration.text;
+      console.log(origin);
+
       setsubstep("search");
       setDoc(
         doc(db, "Ride Requests", currentUser?.phone),
@@ -422,7 +426,9 @@ const MapHomeScreen = () => {
                 title="current"
                 description={currentLocation.description}
                 identifier="current"
-              />
+              >
+                <UserLocationSvg />
+              </Marker>
             )}
             {driverLocation && (
               <Marker
@@ -437,6 +443,7 @@ const MapHomeScreen = () => {
                 identifier="driver"
               >
                 {/* <EvilIcons size={50} name="location" color="#8B8000" /> */}
+                <MapCarSvg />
               </Marker>
             )}
             {origin?.location && (
@@ -450,7 +457,9 @@ const MapHomeScreen = () => {
                 title="Origin"
                 description={origin.description}
                 identifier="origin"
-              />
+              >
+                <UserLocationSvg />
+              </Marker>
             )}
 
             {destination?.location && (

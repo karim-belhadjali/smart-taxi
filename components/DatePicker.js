@@ -18,23 +18,51 @@ const DatePicker = ({ onSelect }) => {
 
   return (
     <>
-      <Text style={[tw`mx-1`, styles.text]}>Date de naissance</Text>
-      <TouchableOpacity
-        style={tw`flex flex-row border border-[#979797] w-[80%] h-10 items-center justify-center rounded-lg px-4`}
-        onPress={() => setShow(true)}
-      >
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            value={date}
-            mode={mode}
-            is24Hour={true}
-            onChange={onChange}
-          />
-        )}
-        <Text style={tw`flex-1`}>{date.toDateString()}</Text>
-        <AntDesign name="calendar" size={20} color="#431879" />
-      </TouchableOpacity>
+      {Platform.OS === "android" && (
+        <>
+          <Text style={[tw`mx-1`, styles.text]}>Date de naissance</Text>
+          <TouchableOpacity
+            style={tw`flex flex-row border border-[#979797] w-[80%] h-10 items-center justify-center rounded-lg px-4`}
+            onPress={() => setShow(true)}
+          >
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                onChange={onChange}
+              />
+            )}
+            <Text style={tw`flex-1`}>{date.toDateString()}</Text>
+            <AntDesign name="calendar" size={20} color="#431879" />
+          </TouchableOpacity>
+        </>
+      )}
+      {Platform.OS !== "android" && (
+        <>
+          <Text style={[tw`mx-1`, styles.text]}>Date de naissance</Text>
+          <TouchableOpacity
+            style={tw`flex flex-row border border-[#979797] w-[80%] h-10 items-center justify-center rounded-lg px-4`}
+            onPress={() => setShow(true)}
+          >
+            {show && (
+              <View style={tw`w-[90%] flex items-start`}>
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={date}
+                  mode={mode}
+                  is24Hour={true}
+                  onChange={onChange}
+                  style={tw`w-full`}
+                />
+              </View>
+            )}
+            {!show && <Text style={tw`flex-1`}>{date.toDateString()}</Text>}
+            <AntDesign name="calendar" size={20} color="#431879" />
+          </TouchableOpacity>
+        </>
+      )}
     </>
   );
 };

@@ -3,9 +3,11 @@ import React, { useState } from "react";
 import tw from "twrnc";
 
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { useRef } from "react";
 
 const Input = ({ placeHolder, value, onChangeText }) => {
   const [borderColor, setborderColor] = useState("#979797");
+  const ref = useRef();
   return (
     <View
       style={[
@@ -16,9 +18,15 @@ const Input = ({ placeHolder, value, onChangeText }) => {
       ]}
     >
       <TextInput
+        ref={ref}
         placeholder={placeHolder}
         value={value}
-        onChangeText={(text) => onChangeText(text)}
+        onChangeText={(text) => {
+          onChangeText(text);
+          if (text.length >= 4) {
+            ref.current.blur();
+          }
+        }}
         style={tw`flex-1`}
         keyboardType="number-pad"
         blurOnSubmit={true}

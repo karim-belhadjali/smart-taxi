@@ -1,6 +1,7 @@
 import React from "react";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import tw from "twrnc";
+import UserLocationSvg from "../assets/svg/UserLocationSvg";
 import NavFavourites from "../components/NavFavourites";
 const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
   return (
@@ -26,7 +27,9 @@ const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
           title="current"
           description={currentLocation.description}
           identifier="current"
-        />
+        >
+          <UserLocationSvg />
+        </Marker>
       </MapView>
 
       <NavFavourites onSearch={() => handleStep("search")} />

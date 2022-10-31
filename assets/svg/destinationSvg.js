@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import Svg, { Path, Circle, Line } from "react-native-svg";
+import tw from "twrnc";
 
 export default function DestinationSvg() {
   return (

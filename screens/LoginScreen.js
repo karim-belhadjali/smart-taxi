@@ -72,7 +72,7 @@ const LoginScreen = () => {
 
     var raw = JSON.stringify({
       messageFormat:
-        "Hello, this is your OTP ${otp}. Please do not share it with anyone",
+        "${otp} est votre code de securité beem. Ce code expirera dans 2 minutes.",
       phoneNumber: `+216${phoneNumber}`,
       otpLength: 4,
       otpValidityInSeconds: 120,
@@ -460,7 +460,7 @@ const LoginScreen = () => {
                 >
                   <Text
                     style={[
-                      tw`mb-2 ml-5 text-[#F74C00] ${
+                      tw`mb-8 ml-5 text-[#F74C00] ${
                         disabled === true ? "opacity-40" : "opacity-100"
                       }`,
                       { fontSize: 14, fontFamily: "Poppins-SemiBold" },
@@ -471,7 +471,7 @@ const LoginScreen = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={tw` rounded-full bg-[#431879] w-[80]  p-4 flex justify-center items-center`}
+                  style={tw` rounded-full bg-[#431879] w-[80]  p-4 flex justify-center items-center bottom-5`}
                   onPress={async () => {
                     try {
                       if (
