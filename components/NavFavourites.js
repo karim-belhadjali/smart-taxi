@@ -27,7 +27,7 @@ const NavFavourites = ({ onSearch, recents }) => {
         },
       ]}
     >
-      <View style={tw`flex w-90% mt-5 mb-1 items-start`}>
+      <View style={tw`flex w-88% mt-5 mb-1 items-start`}>
         <Text style={{ fontFamily: "Poppins-Light" }}>
           Heureux de vous voir
         </Text>
@@ -43,7 +43,7 @@ const NavFavourites = ({ onSearch, recents }) => {
             shadowOpacity: 0.18,
             shadowColor: "#171717",
             shadowOffset: {
-              width: -11,
+              width: -1,
               height: -0.5,
             },
             elevation: 5,
@@ -58,7 +58,7 @@ const NavFavourites = ({ onSearch, recents }) => {
           Recherche de la destination
         </Text>
       </TouchableOpacity>
-      <View style={[tw`flex justify-center w-[100%] items-center mt-2 px-2`]}>
+      <View style={[tw`flex justify-center w-92% items-center mt-2 px-2`]}>
         <FlatList
           data={favoritesData}
           ItemSeparatorComponent={() => (
@@ -75,9 +75,9 @@ const NavFavourites = ({ onSearch, recents }) => {
             return (
               <TouchableOpacity style={tw`flex flex-row my-2 w-screen`}>
                 <EvilIcons
-                  style={tw` pr-3`}
+                  style={tw` mt-1 pr-3`}
                   name="clock"
-                  size={40}
+                  size={30}
                   color="rgba(171, 171, 171, 0.55)"
                 />
                 <Text

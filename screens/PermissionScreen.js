@@ -70,13 +70,19 @@ export default function App() {
               const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`;
               const response = await fetch(url);
               const data = await response.json();
+              let adress;
+              if (data.results[0]?.formatted_address) {
+                adress = data.results[0]?.formatted_address;
+              } else {
+                adress = "inconnu";
+              }
               dispatch(
                 setCurrentLocation({
                   location: {
                     lat: location.coords.latitude,
                     lng: location.coords.longitude,
                   },
-                  description: data.results[0]?.formatted_address,
+                  description: adress,
                 })
               );
               await getUser("Client");

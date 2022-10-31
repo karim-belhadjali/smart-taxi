@@ -31,7 +31,7 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
       </Text>
       <View
         key={"separator"}
-        style={tw`bg-[#000000] opacity-10 h-[.45] mt-1 w-screen`}
+        style={tw`bg-[#000000] opacity-10 h-[.45] mt-2 w-screen`}
       />
       <View
         style={tw`mt-2 w-screen h-[55%] flex flex-row  justify-evenly items-center`}

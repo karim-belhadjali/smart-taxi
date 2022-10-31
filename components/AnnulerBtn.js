@@ -5,7 +5,7 @@ import tw from "twrnc";
 const AnnulerBtn = ({ onClick }) => {
   return (
     <TouchableOpacity
-      style={tw`absolute bottom-3 rounded-full bg-[#fff] w-[80] border-[#431879] border-2 p-4 flex justify-center items-center`}
+      style={tw`absolute bottom-3 ios:bottom-5 rounded-full bg-[#fff] w-[80] border-[#431879] border-2 p-4 flex justify-center items-center`}
       onPress={onClick}
     >
       <Text style={styles.btn}>Annuler</Text>

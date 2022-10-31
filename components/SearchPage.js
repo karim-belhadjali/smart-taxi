@@ -185,14 +185,14 @@ const SearchPage = ({
         </KeyboardAvoidingView>
         {destination && (
           <TouchableOpacity
-            style={tw`absolute w-screen flex items-center justify-center bottom-2 ios:bottom-5`}
+            style={tw`absolute w-screen flex items-center justify-center bottom-2 ios:bottom-10`}
             onPress={() => {
               handleSearch();
             }}
           >
             <View
               key={"separator"}
-              style={tw`bg-[#000000] opacity-10 h-[.35] mt-1 w-screen`}
+              style={tw`bg-[#000000] opacity-10 h-[.35] mb-3 w-screen`}
             />
 
             <View style={tw`flex flex-row justify-center items-center`}>
