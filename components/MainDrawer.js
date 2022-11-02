@@ -1,3 +1,4 @@
+import React, { useRef, useEffect } from "react";
 import {
   SafeAreaView,
   StatusBar,
@@ -5,8 +6,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Animated,
+  Dimensions,
 } from "react-native";
-import React from "react";
 import tw from "twrnc";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MenuItem from "./MenuItem";
@@ -17,11 +19,31 @@ import { useSelector } from "react-redux";
 const MainDrawer = () => {
   const navigation = useNavigation();
   const user = useSelector(selectCurrentUser);
+  const screenWidth = Dimensions.get("window").width;
+  const screenHieght = Dimensions.get("window").height;
+
+  const leftpos = useRef(new Animated.Value(-screenWidth)).current;
+  useEffect(() => {
+    Animated.timing(leftpos, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  }, []);
   return (
     <SafeAreaView
-      style={tw`h-screen bg-white android:pt-[${StatusBar.currentHeight}]`}
+      style={[
+        tw`h-screen bg-white android:pt-[${StatusBar.currentHeight}]`,
+        StyleSheet.absoluteFill,
+      ]}
     >
-      <View style={tw`flex flex-row w-screen h-screen `}>
+      <Animated.View
+        style={[
+          tw`flex flex-row w-screen h-screen `,
+          StyleSheet.absoluteFill,
+          { left: leftpos },
+        ]}
+      >
         <View style={tw`bg-[#FFFFFF]  w-[75%] flex items-center`}>
           <View style={tw`w-[90%] flex flex-row mt-5`}>
             <View
@@ -84,7 +106,7 @@ const MainDrawer = () => {
             });
           }}
         />
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };

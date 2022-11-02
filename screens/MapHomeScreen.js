@@ -5,6 +5,10 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
 } from "react-native";
 import {
   selectDestination,
@@ -22,8 +26,8 @@ import {
   selectTravelTimeInfo,
 } from "../app/slices/navigationSlice";
 import Entypo from "react-native-vector-icons/Entypo";
-import EvilIcons from "react-native-vector-icons/EvilIcons";
-
+import AntDesign from "react-native-vector-icons/AntDesign";
+import MenuItem from "../components/MenuItem";
 import MapView, { Marker } from "react-native-maps";
 
 import MapViewDirections from "react-native-maps-directions";
@@ -71,7 +75,11 @@ const MapHomeScreen = () => {
   const [currentStep, setcurrentStep] = useState("home");
   const [substep, setsubstep] = useState("search");
   const [mapHeight, setmapHeight] = useState("60%");
-  const [displayMenu, setdisplayMenu] = useState("false");
+  const [displayMenu, setdisplayMenu] = useState(false);
+
+  // Animations menu
+  const screenWidth = Dimensions.get("window").width;
+  const leftpos = useRef(new Animated.Value(-screenWidth)).current;
 
   useEffect(() => {
     if (!origin || !destination || currentStep !== "confirm") return;
@@ -323,6 +331,26 @@ const MapHomeScreen = () => {
     return price;
   };
 
+  //Animations functions
+
+  const handleOpenMenu = () => {
+    setdisplayMenu(true);
+    Animated.timing(leftpos, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  };
+  const handleCloseMenu = () => {
+    setdisplayMenu(false);
+
+    Animated.timing(leftpos, {
+      toValue: -screenWidth,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, paddingTop: StatusBar.currentHeight }}
@@ -331,6 +359,7 @@ const MapHomeScreen = () => {
       {currentStep !== "confirm" &&
         currentStep !== "finished" &&
         currentStep !== "search" &&
+        !displayMenu &&
         searching === false && (
           <View
             style={[
@@ -338,7 +367,9 @@ const MapHomeScreen = () => {
             ]}
           >
             <TouchableOpacity
-              onPress={() => navigation.navigate("MainDrawer")}
+              onPress={() => {
+                handleOpenMenu();
+              }}
               style={tw`bg-gray-50 p-3 mt-1 w-12 h-12 rounded-full shadow-lg mr-3`}
             >
               <Entypo name="menu" size={25} />
@@ -524,6 +555,77 @@ const MapHomeScreen = () => {
           }}
         />
       )}
+      <Animated.View
+        style={[
+          tw`flex flex-row w-screen h-screen android:mt-[${StatusBar.currentHeight}]`,
+          StyleSheet.absoluteFill,
+          { left: leftpos },
+        ]}
+      >
+        <View style={tw`bg-[#FFFFFF]  w-[75%] flex items-center`}>
+          <View style={tw`w-[90%] flex flex-row mt-5`}>
+            <View
+              style={tw`bg-[#431879] rounded-full w-12 h-12 flex justify-center items-center`}
+            >
+              <AntDesign style={tw``} name={"user"} size={25} color={"#ffff"} />
+            </View>
+            <Text
+              style={[
+                tw`mt-3 mx-3`,
+                { fontFamily: "Poppins-Bold", fontSize: 20 },
+              ]}
+              numberOfLines={1}
+            >
+              {user?.fullName}
+            </Text>
+          </View>
+          <View style={tw`bg-[#000000] opacity-10 h-[.45] w-full mt-5`} />
+          <View style={tw`mt-5 w-[90%]`}>
+            <MenuItem
+              iconName={"hearto"}
+              text="Profile"
+              onClick={() => navigation.navigate("Profile")}
+            />
+            <View style={tw`opacity-30`}>
+              <MenuItem
+                iconName={"clockcircleo"}
+                text="Historique"
+                onClick={() => console.log("disabled")}
+              />
+            </View>
+            <MenuItem
+              iconName={"infocirlceo"}
+              text="À propos"
+              onClick={() => {
+                navigation.navigate("À propos");
+              }}
+            />
+          </View>
+          <Text
+            style={[
+              tw`absolute bottom-2 left-10`,
+              { fontFamily: "Poppins-SemiBold", fontSize: 15, opacity: 0.5 },
+            ]}
+          >
+            Beem 2022 - Version 1.0
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={tw`bg-[#000000] opacity-50 w-[25%]`}
+          onPress={() => {
+            // navigation.navigate("HomeScreen");
+            // navigation.reset({
+            //   index: 0,
+            //   routes: [
+            //     {
+            //       name: "HomeScreen",
+            //     },
+            //   ],
+            // });
+            handleCloseMenu();
+          }}
+        />
+      </Animated.View>
     </KeyboardAvoidingView>
   );
 };
