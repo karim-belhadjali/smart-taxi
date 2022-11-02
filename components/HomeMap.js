@@ -14,7 +14,7 @@ const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
           longitudeDelta: 0.005,
         }}
         mapType="mutedStandard"
-        style={tw`w-screen h-[60%]`}
+        style={tw`w-screen h-[60%] `}
         zoomEnabled={true}
       >
         <Marker

@@ -30,6 +30,7 @@ import { doc, setDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import InputGeneral from "../components/InputGeneral";
 
 const CompleteProfileScreen = () => {
   const navigation = useNavigation();
@@ -44,7 +45,7 @@ const CompleteProfileScreen = () => {
   const [showerror, setshowerror] = useState(undefined);
 
   const [selectedGov, setselectedGov] = useState("Ben Arous");
-  const [selectedVille, setselectedVille] = useState("Rades");
+  const [selectedVille, setselectedVille] = useState("");
   const [currentDate, setcurrentDate] = useState(new Date(Date.now()));
   const [codePostal, setcodePostal] = useState("");
 
@@ -54,20 +55,84 @@ const CompleteProfileScreen = () => {
   const [firstGroupDisabled, setfirstGroupDisabled] = useState(false);
   const [secondGroupDisabled, setsecondGroupDisabled] = useState(true);
 
-  const gouvernorats = ["ben arous", "ariana", "mannouba"];
-  const govs = [
-    { key: 1, section: true, label: "Fruits" },
-    { key: 2, label: "Red Apples" },
-    { key: 3, label: "Cherries" },
-    { key: 4, label: "Cranberries" },
-    { key: 5, label: "Pink Grapefruit" },
-    { key: 6, label: "Raspberries" },
-    { key: 8, label: "Beets" },
-    { key: 9, label: "Red Peppers" },
-    { key: 7, label: "Radishes" },
-    { key: 41, label: "Red Onions" },
+  const gouvernorats = [
+    "Ariana",
+    "Beja",
+    "Ben Arous",
+    "Bizerte",
+    "Gabès",
+    "Gafsa",
+    "Jendouba",
+    "Kairouan",
+    "Kasserine",
+    "Kébili",
+    "Kef",
+    "Mahdia",
+    "Manouba",
+    "Médenine",
+    "Monastir",
+    "Nabeul",
+    "Sfax",
+    "Sidi Bouzid",
+    "Siliana",
+    "Sousse",
+    "Tataouine",
+    "Tozeur",
+    "Tunis",
+    "Zaghouan",
   ];
-  const ville = ["Hammem-lif", "ezzahra", "rades"];
+  const govs = [
+    { key: 1, section: true, label: "Ariana" },
+    { key: 2, label: "Beja" },
+    { key: 3, label: "Ben Arous" },
+    { key: 4, label: "Bizerte" },
+    { key: 5, label: "Gabès" },
+    { key: 6, label: "Gafsa" },
+    { key: 7, label: "Jendouba" },
+    { key: 8, label: "Kairouan" },
+    { key: 9, label: "Kasserine" },
+    { key: 10, label: "Kébili" },
+    { key: 11, label: "Kef" },
+    { key: 12, label: "Mahdia" },
+    { key: 13, label: "Médenine" },
+    { key: 14, label: "Manouba" },
+    { key: 15, label: "Monastir" },
+    { key: 16, label: "Nabeul" },
+    { key: 17, label: "Sfax" },
+    { key: 18, label: "Sidi Bouzid" },
+    { key: 19, label: "Siliana" },
+    { key: 20, label: "Sousse" },
+    { key: 21, label: "Tataouine" },
+    { key: 22, label: "Tozeur" },
+    { key: 23, label: "Tunis" },
+    { key: 24, label: "Zaghouan" },
+  ];
+  const ville = [
+    "Ariana",
+    "Beja",
+    "Ben Arous",
+    "Bizerte",
+    "Gabès",
+    "Gafsa",
+    "Jendouba",
+    "Kairouan",
+    "Kasserine",
+    "Kébili",
+    "Kef",
+    "Mahdia",
+    "Manouba",
+    "Médenine",
+    "Monastir",
+    "Nabeul",
+    "Sfax",
+    "Sidi Bouzid",
+    "Siliana",
+    "Sousse",
+    "Tataouine",
+    "Tozeur",
+    "Tunis",
+    "Zaghouan",
+  ];
   const villes = [
     { key: 1, section: true, label: "Fruits" },
     { key: 2, label: "Red Apples" },
@@ -265,10 +330,10 @@ const CompleteProfileScreen = () => {
                     setSelectedLanguage={setselectedGov}
                     items={gouvernorats}
                   />
-                  <PickerList
-                    selectedValue={selectedVille}
-                    setSelectedLanguage={setselectedVille}
-                    items={ville}
+                  <InputGeneral
+                    placeHolder="Ville"
+                    value={selectedVille}
+                    onChangeText={setselectedVille}
                   />
                   <Input
                     placeHolder="Code postal"
@@ -284,12 +349,13 @@ const CompleteProfileScreen = () => {
                     title="Lieu de résidence principal"
                     selectedValue={"Gouvernorat"}
                     setSelectedLanguage={setselectedGov}
-                    items={govs}
+                    items={gouvernorats}
                   />
-                  <PickerList
-                    selectedValue={"Ville"}
-                    setSelectedLanguage={setselectedVille}
-                    items={villes}
+
+                  <InputGeneral
+                    placeHolder="Ville"
+                    value={selectedVille}
+                    onChangeText={setselectedVille}
                   />
                   <Input
                     placeHolder="Code postal"

@@ -80,6 +80,7 @@ const MapHomeScreen = () => {
   // Animations menu
   const screenWidth = Dimensions.get("window").width;
   const leftpos = useRef(new Animated.Value(-screenWidth)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!origin || !destination || currentStep !== "confirm") return;
@@ -143,6 +144,7 @@ const MapHomeScreen = () => {
 
   useEffect(() => {
     setsearching(false);
+    setdisplayMenu(false);
   }, []);
 
   const handleSearch = () => {
@@ -326,7 +328,7 @@ const MapHomeScreen = () => {
     const lessBusyHours = [9, 10, 16, 19];
     let price = 0;
 
-    price = (startcounter + parseFloat(distanceClient) * 1.1).toFixed(3);
+    price = (startcounter + parseFloat(distanceClient) * 0.85).toFixed(3);
 
     return price;
   };
@@ -335,20 +337,33 @@ const MapHomeScreen = () => {
 
   const handleOpenMenu = () => {
     setdisplayMenu(true);
+
     Animated.timing(leftpos, {
       toValue: 0,
-      duration: 500,
+      duration: 300,
       useNativeDriver: false,
-    }).start();
+    }).start(() => {
+      Animated.timing(opacity, {
+        toValue: 0.2,
+        duration: 100,
+        useNativeDriver: false,
+      }).start();
+    });
   };
   const handleCloseMenu = () => {
     setdisplayMenu(false);
 
-    Animated.timing(leftpos, {
-      toValue: -screenWidth,
-      duration: 500,
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 20,
       useNativeDriver: false,
-    }).start();
+    }).start(() => {
+      Animated.timing(leftpos, {
+        toValue: -screenWidth,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    });
   };
 
   return (
@@ -555,6 +570,7 @@ const MapHomeScreen = () => {
           }}
         />
       )}
+
       <Animated.View
         style={[
           tw`flex flex-row w-screen h-screen android:mt-[${StatusBar.currentHeight}]`,
@@ -610,21 +626,15 @@ const MapHomeScreen = () => {
             Beem 2022 - Version 1.0
           </Text>
         </View>
-        <TouchableOpacity
-          style={tw`bg-[#000000] opacity-50 w-[25%]`}
-          onPress={() => {
-            // navigation.navigate("HomeScreen");
-            // navigation.reset({
-            //   index: 0,
-            //   routes: [
-            //     {
-            //       name: "HomeScreen",
-            //     },
-            //   ],
-            // });
-            handleCloseMenu();
-          }}
-        />
+        <Animated.View style={[tw`bg-[#000000] w-[25%]`, { opacity: opacity }]}>
+          <TouchableOpacity
+            activeOpacity={0}
+            style={[tw`bg-transparent w-full h-full`]}
+            onPress={() => {
+              handleCloseMenu();
+            }}
+          />
+        </Animated.View>
       </Animated.View>
     </KeyboardAvoidingView>
   );

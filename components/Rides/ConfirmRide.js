@@ -55,13 +55,13 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
       </View>
       <View style={tw`mt-2 w-screen flex flex-row justify-evenly items-center`}>
         <TouchableOpacity
-          style={tw`rounded-full bg-[#fff] w-[40] border-[#431879] border-2 p-4 flex justify-center items-center`}
+          style={tw`rounded-full bg-[#fff] w-[43%] border-[#431879] border-2 p-4 flex justify-center items-center`}
           onPress={onCancel}
         >
           <Text style={styles.btnAnnuler}>Annuler</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={tw`rounded-full bg-[#431879] w-[50] border-[#431879]  p-4 flex justify-center items-center`}
+          style={tw`rounded-full bg-[#431879] w-[51%] border-[#431879]  p-4 flex justify-center items-center`}
           onPress={onConfirm}
         >
           <Text style={styles.btn}>Confirmer</Text>
