@@ -10,7 +10,7 @@ import {
   StatusBar,
   ActivityIndicator,
 } from "react-native";
-import { signInAnonymously } from "firebase/auth";
+import { signInAnonymously, signInWithEmailAndPassword } from "firebase/auth";
 
 import { auth, app, functions, db } from "../firebase";
 
@@ -180,7 +180,7 @@ const LoginScreen = () => {
     if (docSnap?.exists()) {
       client = docSnap.data();
       seterror(null);
-      signInAnonymously(auth)
+      signInWithEmailAndPassword(auth, docSnap.data().email, phoneNumber)
         .then(async () => {
           await storeUser(client);
           dispatch(setCurrentUser(docSnap.data()));

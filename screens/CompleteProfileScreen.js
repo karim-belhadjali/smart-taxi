@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Platform,
+  SafeAreaView,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
@@ -28,6 +29,7 @@ import { selectUserInfo, setCurrentUser } from "../app/slices/navigationSlice";
 import { doc, setDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const CompleteProfileScreen = () => {
   const navigation = useNavigation();
@@ -107,25 +109,11 @@ const CompleteProfileScreen = () => {
       setcurrentStep("step3");
     } else {
       setsaving(true);
-      setDoc(
-        doc(db, "clients", userinfo.phone),
-        {
-          fullName: fullName,
-          email: email,
-          gouvernorat: selectedGov,
-          ville: selectedVille,
-          birthDate: currentDate.toString(),
-          codePostal: codePostal,
-          attendance: { main: mainGroup, secondary: subGroup },
-          phone: userinfo?.phone,
-        },
-        {
-          merge: true,
-        }
-      )
-        .then(async () => {
-          dispatch(
-            setCurrentUser({
+      createUserWithEmailAndPassword(auth, email, `${userinfo.phone}`)
+        .then(() => {
+          setDoc(
+            doc(db, "clients", userinfo.phone),
+            {
               fullName: fullName,
               email: email,
               gouvernorat: selectedGov,
@@ -134,20 +122,43 @@ const CompleteProfileScreen = () => {
               codePostal: codePostal,
               attendance: { main: mainGroup, secondary: subGroup },
               phone: userinfo?.phone,
+            },
+            {
+              merge: true,
+            }
+          )
+            .then(async () => {
+              dispatch(
+                setCurrentUser({
+                  fullName: fullName,
+                  email: email,
+                  gouvernorat: selectedGov,
+                  ville: selectedVille,
+                  birthDate: currentDate.toString(),
+                  codePostal: codePostal,
+                  attendance: { main: mainGroup, secondary: subGroup },
+                  phone: userinfo?.phone,
+                })
+              );
+              await storeUser({
+                fullName: fullName,
+                email: email,
+                gouvernorat: selectedGov,
+                ville: selectedVille,
+                birthDate: currentDate,
+                codePostal: codePostal,
+                attendance: { main: mainGroup, secondary: subGroup },
+                phone: userinfo?.phone,
+              });
             })
-          );
-          await storeUser({
-            fullName: fullName,
-            email: email,
-            gouvernorat: selectedGov,
-            ville: selectedVille,
-            birthDate: currentDate,
-            codePostal: codePostal,
-            attendance: { main: mainGroup, secondary: subGroup },
-            phone: userinfo?.phone,
-          });
+            .catch((err) => {
+              setcurrentStep("step1");
+              showerror({
+                text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
+              });
+            });
         })
-        .catch((err) => {
+        .catch(() => {
           setcurrentStep("step1");
           showerror({
             text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
@@ -407,7 +418,7 @@ const CompleteProfileScreen = () => {
         </KeyboardAvoidingView>
       )}
       {saving && (
-        <View style={tw`h-screen w-screen`}>
+        <SafeAreaView style={tw`h-full w-screen android:mt-[${40}]`}>
           <View
             style={[
               StyleSheet.absoluteFill,
@@ -421,7 +432,7 @@ const CompleteProfileScreen = () => {
           >
             <ActivityIndicator size={80} color="#F74C00" />
           </View>
-        </View>
+        </SafeAreaView>
       )}
       <StatusBar style="light" />
     </>
