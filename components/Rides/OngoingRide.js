@@ -8,7 +8,6 @@ import StarSvg from "../../assets/svg/StarSvg";
 import DestinationSvg from "../../assets/svg/destinationSvg";
 
 const OngoingRide = ({ ride, onNext }) => {
-  console.log(ride);
   return (
     <View
       style={[

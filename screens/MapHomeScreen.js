@@ -152,7 +152,6 @@ const MapHomeScreen = () => {
       setsearching(true);
       let distance = parseFloat(travelTimeInfo.distance.text);
       let duration = travelTimeInfo.duration.text;
-      console.log(origin);
 
       setsubstep("search");
       setDoc(
@@ -426,10 +425,7 @@ const MapHomeScreen = () => {
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
-            mapType="mutedStandard"
-            provider="google"
             style={tw`w-screen h-[${mapHeight}]`}
-            zoomEnabled={true}
           >
             {origin && destination && (
               <MapViewDirections

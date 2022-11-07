@@ -3,6 +3,8 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import tw from "twrnc";
 import UserLocationSvg from "../assets/svg/UserLocationSvg";
 import NavFavourites from "../components/NavFavourites";
+import { StyleSheet, Dimensions, StatusBar } from "react-native";
+
 const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
   return (
     <>
@@ -13,9 +15,7 @@ const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
           latitudeDelta: 0.005,
           longitudeDelta: 0.005,
         }}
-        mapType="mutedStandard"
-        style={tw`w-screen h-[60%] `}
-        zoomEnabled={true}
+        style={styles.map}
       >
         <Marker
           coordinate={{
@@ -33,14 +33,21 @@ const HomeMap = ({ currentLocation, handleStep, currentLocationActive }) => {
       </MapView>
 
       <NavFavourites onSearch={() => handleStep("search")} />
-      {/* <TouchableOpacity
-        style={tw`rounded-full absolute w-[11] h-[11] flex justify-center items-center bottom-[42%] right-[5%] bg-[#fff]`}
-        // onPress={() => setcurrentLocationActive(!currentLocationActive)}
-      >
-        <LocationSvg currentLocationActive={currentLocationActive} />
-      </TouchableOpacity> */}
     </>
   );
 };
 
 export default HomeMap;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    height: "100%",
+    paddingTop: StatusBar.currentHeight,
+  },
+  map: {
+    width: Dimensions.get("window").width,
+    height: "60%",
+  },
+});

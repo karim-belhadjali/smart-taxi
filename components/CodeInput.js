@@ -6,7 +6,6 @@ const CodeInput = ({ index, active, onChange }) => {
   const ref = useRef();
 
   if (index == active) {
-    console.log(ref.current.focus());
   }
 
   const handleChange = (codeNumber) => {
