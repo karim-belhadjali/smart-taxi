@@ -14,7 +14,7 @@ import {
 
 import * as Location from "expo-location";
 import * as Network from "expo-network";
-import { GOOGLE_MAPS_API_KEY } from "@env";
+const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 

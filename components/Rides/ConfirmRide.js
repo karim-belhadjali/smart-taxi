@@ -4,6 +4,12 @@ import tw from "twrnc";
 import CarSvg from "../../assets/svg/CarSvg";
 
 const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
+  let place;
+  if (rideInfo?.place === "inconnu") {
+    place = "votre emplacement";
+  } else {
+    place = rideInfo?.place;
+  }
   return (
     <View
       style={[
@@ -27,7 +33,7 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
         ]}
         numberOfLines={1}
       >
-        Rendez-vous a {rideInfo?.place}
+        Rendez-vous a {place}
       </Text>
       <View
         key={"separator"}
@@ -53,7 +59,9 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
           )}
         </View>
       </View>
-      <View style={tw`mt-2 w-screen flex flex-row justify-evenly items-center`}>
+      <View
+        style={tw`mt-2 mb-2 w-screen flex flex-row justify-evenly items-center`}
+      >
         <TouchableOpacity
           style={tw`rounded-full bg-[#fff] w-[43%] border-[#431879] border-2 p-4 flex justify-center items-center`}
           onPress={onCancel}

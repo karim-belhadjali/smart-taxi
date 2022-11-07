@@ -6,6 +6,12 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import * as Linking from "expo-linking";
 
 const WaitingRide = ({ ride, onCall }) => {
+  let place;
+  if (ride?.origin.description === "inconnu") {
+    place = "votre emplacement";
+  } else {
+    place = ride?.origin.description;
+  }
   return (
     <View
       style={[
@@ -29,7 +35,7 @@ const WaitingRide = ({ ride, onCall }) => {
         ]}
         numberOfLines={1}
       >
-        Rendez-vous a {ride?.origin.description}
+        Rendez-vous a {place}
       </Text>
       <View
         key={"separator"}

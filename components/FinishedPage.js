@@ -12,6 +12,12 @@ import FinalCarSvg from "../assets/svg/FinalCarSvg";
 import StarSvg from "../assets/svg/StarSvg";
 
 const FinishedPage = ({ ride, OnFinish }) => {
+  let place;
+  if (ride?.origin.description === "inconnu") {
+    place = "votre emplacement";
+  } else {
+    place = ride?.origin.description;
+  }
   return (
     <View
       style={tw`flex justify-around items-center w-screen h-screen  pt-[${
@@ -31,7 +37,7 @@ const FinishedPage = ({ ride, OnFinish }) => {
               ]}
               numberOfLines={1}
             >
-              {ride?.origin.description}
+              {place}
             </Text>
             <Text
               style={[tw`mb-1`, { fontFamily: "Poppins-Bold", fontSize: 18 }]}
