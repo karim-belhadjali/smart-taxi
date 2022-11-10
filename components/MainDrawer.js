@@ -15,6 +15,7 @@ import MenuItem from "./MenuItem";
 import { useNavigation } from "@react-navigation/core";
 import { selectCurrentUser } from "../app/slices/navigationSlice";
 import { useSelector } from "react-redux";
+import { moderateScale } from "../Metrics";
 
 const MainDrawer = () => {
   const navigation = useNavigation();
@@ -39,7 +40,7 @@ const MainDrawer = () => {
     >
       <Animated.View
         style={[
-          tw`flex flex-row w-screen h-screen `,
+          tw`flex flex-row w-screen h-full`,
           StyleSheet.absoluteFill,
           { left: leftpos },
         ]}
@@ -54,9 +55,11 @@ const MainDrawer = () => {
             <Text
               style={[
                 tw`mt-3 mx-3`,
-                { fontFamily: "Poppins-Bold", fontSize: 20 },
+                { fontFamily: "Poppins-Bold", fontSize: screenWidth * 0.05 },
               ]}
               numberOfLines={1}
+              adjustsFontSizeToFit
+              allowFontScaling={false}
             >
               {user?.fullName}
             </Text>
@@ -86,10 +89,17 @@ const MainDrawer = () => {
           <Text
             style={[
               tw`absolute bottom-2 left-10`,
-              { fontFamily: "Poppins-SemiBold", fontSize: 15, opacity: 0.5 },
+              {
+                fontFamily: "Poppins-SemiBold",
+                fontSize: moderateScale(15),
+                opacity: 0.5,
+              },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
           >
-            Beem 2022 - Version 1.0
+            Beem 2022 - Version 1.0.0
           </Text>
         </View>
         <TouchableOpacity

@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,8 +11,11 @@ import tw from "twrnc";
 import DestinationSvgBig from "../assets/svg/destinationSvgBig";
 import FinalCarSvg from "../assets/svg/FinalCarSvg";
 import StarSvg from "../assets/svg/StarSvg";
+import { moderateScale } from "../Metrics";
 
 const FinishedPage = ({ ride, OnFinish }) => {
+  const { width, height } = Dimensions.get("window");
+
   let place;
   if (ride?.origin.description === "inconnu") {
     place = "votre emplacement";
@@ -33,15 +37,22 @@ const FinishedPage = ({ ride, OnFinish }) => {
             <Text
               style={[
                 tw`mb-4`,
-                { fontFamily: "Poppins-Regular", fontSize: 18 },
+                { fontFamily: "Poppins-Regular", fontSize: width * 0.05 },
               ]}
               numberOfLines={1}
+              adjustsFontSizeToFit
+              allowFontScaling={false}
             >
               {place}
             </Text>
             <Text
-              style={[tw`mb-1`, { fontFamily: "Poppins-Bold", fontSize: 18 }]}
+              style={[
+                tw`mb-1`,
+                { fontFamily: "Poppins-Bold", fontSize: width * 0.05 },
+              ]}
               numberOfLines={1}
+              adjustsFontSizeToFit
+              allowFontScaling={false}
             >
               {ride?.destination.description}
             </Text>
@@ -55,14 +66,22 @@ const FinishedPage = ({ ride, OnFinish }) => {
 
       <FinalCarSvg style={tw`mr-8`} />
       <View style={tw`flex items-center `}>
-        <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 30 }]}>
+        <Text
+          style={[tw``, { fontFamily: "Poppins-Bold", fontSize: width * 0.08 }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
+        >
           {ride?.price} TND
         </Text>
         <Text
           style={[
             tw`opacity-60`,
-            { fontFamily: "Poppins-Light", fontSize: 15 },
+            { fontFamily: "Poppins-Light", fontSize: width * 0.05 },
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
         >
           Paiement Cash
         </Text>
@@ -73,7 +92,13 @@ const FinishedPage = ({ ride, OnFinish }) => {
       >
         <StarSvg style={tw`mt-1`} />
         <Text
-          style={[tw`pt-2`, { fontFamily: "Poppins-Regular", fontSize: 14 }]}
+          style={[
+            tw`pt-2`,
+            { fontFamily: "Poppins-Regular", fontSize: width * 0.04 },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
         >
           beem vous souhaite une Bonne journée !
         </Text>
@@ -83,9 +108,12 @@ const FinishedPage = ({ ride, OnFinish }) => {
       <Text
         style={[
           tw`pt-2 opacity-60 underline`,
-          { fontFamily: "Poppins-Light", fontSize: 20 },
+          { fontFamily: "Poppins-Light", fontSize: width * 0.05 },
         ]}
         onPress={OnFinish}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        allowFontScaling={false}
       >
         Retour à la page d’accueil
       </Text>

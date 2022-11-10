@@ -1,4 +1,10 @@
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import tw from "twrnc";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -7,9 +13,12 @@ import React from "react";
 
 import { useDispatch } from "react-redux";
 import { setDestination } from "../app/slices/navigationSlice";
+import { moderateScale } from "../Metrics";
 
 const NavFavourites = ({ onSearch, recents }) => {
   const dispatch = useDispatch();
+
+  const { width, height } = Dimensions.get("window");
 
   return (
     <View
@@ -28,16 +37,32 @@ const NavFavourites = ({ onSearch, recents }) => {
       ]}
     >
       <View style={tw`flex w-88% mt-5 mb-1 items-start`}>
-        <Text style={{ fontFamily: "Poppins-Light" }}>
+        <Text
+          style={{
+            fontFamily: "Poppins-Light",
+            fontSize: width * 0.05,
+          }}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
+        >
           Heureux de vous voir
         </Text>
-        <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 20 }}>
+        <Text
+          style={{
+            fontFamily: "Poppins-SemiBold",
+            fontSize: width * 0.05,
+          }}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
+        >
           Où aller vous ?
         </Text>
       </View>
       <TouchableOpacity
         style={[
-          tw`rounded-2xl w-92% bg-white h-13 flex flex-row items-center px-4 mt-1`,
+          tw`rounded-2xl w-92% bg-white h-13 flex flex-row items-center px-4 mt-[2%] mb-[2%]`,
           {
             shadowRadius: 5,
             shadowOpacity: 0.18,
@@ -53,7 +78,16 @@ const NavFavourites = ({ onSearch, recents }) => {
       >
         <AntDesign style={tw` pr-3`} name="search1" size={20} color="#F74C00" />
         <Text
-          style={[tw`flex-1 mt-1 opacity-50`, { fontFamily: "Poppins-Light" }]}
+          style={[
+            tw`flex-1 mt-1 opacity-50`,
+            {
+              fontFamily: "Poppins-Light",
+              fontSize: width * 0.04,
+            },
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
         >
           Recherche de la destination
         </Text>
@@ -83,8 +117,14 @@ const NavFavourites = ({ onSearch, recents }) => {
                 <Text
                   style={[
                     tw`flex-1 mt-1 opacity-30`,
-                    { fontFamily: "Poppins-Light", fontSize: 15 },
+                    {
+                      fontFamily: "Poppins-Light",
+                      fontSize: width * 0.04,
+                    },
                   ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
                 >
                   Lieux récents bientôt disponibles
                 </Text>

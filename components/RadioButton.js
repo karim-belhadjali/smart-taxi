@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { RadioButton } from "react-native-paper";
 import tw from "twrnc";
@@ -15,7 +15,15 @@ const RadioButtons = ({ title, value, onSelect, state, disabled }) => {
         }}
         color="#F74C00"
       />
-      <Text style={[tw`mt-2 ${state === value ? "text-[#F74C00]" : ""}`]}>
+      <Text
+        style={[
+          tw`mt-2 ${state === value ? "text-[#F74C00]" : ""}`,
+          { fontSize: Dimensions.get("window").width * 0.04 },
+        ]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        allowFontScaling={false}
+      >
         {title}
       </Text>
     </View>

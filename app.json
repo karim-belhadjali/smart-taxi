@@ -24,11 +24,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.karim.belhadjali.smarttaxi",
+      "package": "com.beem.smarttaxi",
       "config": {
         "googleMaps": { "apiKey": "AIzaSyC68H_H39puGTSmrl2XNhS2d9I7YXIn3fo" }
       },
-      "versionCode": 3
+      "versionCode": 2
     },
     "web": {
       "favicon": "./assets/favicon.png"

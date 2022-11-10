@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Platform,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
@@ -31,8 +32,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import InputGeneral from "../components/InputGeneral";
+import { moderateScale } from "../Metrics";
 
 const CompleteProfileScreen = () => {
+  const { width, height } = Dimensions.get("window");
+
   const navigation = useNavigation();
   let userinfo = useSelector(selectUserInfo);
   const dispatch = useDispatch();
@@ -284,7 +288,15 @@ const CompleteProfileScreen = () => {
           {currentStep === "step1" && (
             <>
               <View style={[styles.styleSEnregistrer, tw`mb-5`]}>
-                <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 30 }}>
+                <Text
+                  style={{
+                    fontFamily: "Poppins-SemiBold",
+                    fontSize: width * 0.05,
+                  }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
+                >
                   S'enregistrer
                 </Text>
               </View>
@@ -308,9 +320,12 @@ const CompleteProfileScreen = () => {
                   <Text
                     style={{
                       fontFamily: "Poppins-Regular",
-                      fontSize: 14,
+                      fontSize: width * 0.035,
                       color: "#F74C00",
                     }}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    allowFontScaling={false}
                   >
                     {showerror.text}
                   </Text>
@@ -375,9 +390,12 @@ const CompleteProfileScreen = () => {
                 style={{
                   width: "80%",
                   fontFamily: "Poppins-Regular",
-                  fontSize: 15,
+                  fontSize: width * 0.04,
                   lineHeight: 30,
                 }}
+                numberOfLines={2}
+                adjustsFontSizeToFit
+                allowFontScaling={false}
               >
                 En précisant votre fréquence d'utilisation des taxis vous pouvez
                 recevoir un service adapté à vos besoins et plusieurs avantages
@@ -463,13 +481,20 @@ const CompleteProfileScreen = () => {
           )}
           {currentStep !== "step1" && (
             <View
-              style={tw`absolute bottom-3 ios:bottom-10 w-screen flex flex-row justify-between px-8 `}
+              style={tw`absolute bottom-[${
+                Dimensions.get("window").height < 720 ? 5 : 3
+              }] ios:bottom-10 w-screen flex flex-row justify-between px-8 `}
             >
               <TouchableOpacity
                 style={tw`rounded-full bg-[#fff] w-45%  p-4 flex justify-center items-center`}
                 onPress={handleNext}
               >
-                <Text style={[styles.btn, styles.ignore]}>Ignorer</Text>
+                <Text
+                  style={[styles.btn, styles.ignore]}
+                  allowFontScaling={false}
+                >
+                  Ignorer
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -477,14 +502,19 @@ const CompleteProfileScreen = () => {
                 ]}
                 onPress={handleNext}
               >
-                <Text style={[styles.btn, styles.next]}>Suivant</Text>
+                <Text
+                  style={[styles.btn, styles.next]}
+                  allowFontScaling={false}
+                >
+                  Suivant
+                </Text>
               </TouchableOpacity>
             </View>
           )}
         </KeyboardAvoidingView>
       )}
       {saving && (
-        <SafeAreaView style={tw`h-full w-screen android:mt-[${40}]`}>
+        <SafeAreaView style={tw`h-full w-screen `}>
           <View
             style={[
               StyleSheet.absoluteFill,
@@ -543,7 +573,7 @@ const styles = StyleSheet.create({
     width: "80%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    fontSize: 30,
+    fontSize: moderateScale(30),
   },
   inputContainer: {
     width: "80%",

@@ -1,11 +1,13 @@
-import { StyleSheet, TextInput, View } from "react-native";
+import { Dimensions, StyleSheet, TextInput, View } from "react-native";
 import React, { useState } from "react";
 import tw from "twrnc";
 
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { moderateScale } from "../Metrics";
 
 const TextInputs = ({ placeHolder, value, onChangeText, iconName }) => {
   const [borderColor, setborderColor] = useState("#431879");
+  const { width, height } = Dimensions.get("window");
   return (
     <View
       style={[
@@ -27,7 +29,7 @@ const TextInputs = ({ placeHolder, value, onChangeText, iconName }) => {
         placeholder={placeHolder}
         value={value}
         onChangeText={(text) => onChangeText(text)}
-        style={tw`flex-1`}
+        style={[tw`flex-1`, { fontSize: width * 0.05 }]}
         onFocus={() => {
           setborderColor("#FAC100");
         }}

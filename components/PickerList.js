@@ -9,7 +9,16 @@ const PickerList = ({ title, selectedValue, setSelectedLanguage, items }) => {
     <>
       {Platform.OS === "android" && (
         <View style={tw`flex items-start w-[80%] mt-5`}>
-          {title && <Text style={[tw`mx-1`, styles.text]}>{title}</Text>}
+          {title && (
+            <Text
+              style={[tw`mx-1`, styles.text]}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+              allowFontScaling={false}
+            >
+              {title}
+            </Text>
+          )}
           <View
             style={tw`border border-[#979797] w-[100%] rounded-lg px-2 text-[#979797]`}
           >
@@ -29,7 +38,16 @@ const PickerList = ({ title, selectedValue, setSelectedLanguage, items }) => {
       )}
       {Platform.OS !== "android" && (
         <View style={tw`flex items-start w-[80%] mt-5`}>
-          {title && <Text style={[tw`mx-1`, styles.text]}>{title}</Text>}
+          {title && (
+            <Text
+              style={[tw`mx-1`, styles.text]}
+              adjustsFontSizeToFit
+              numberOfLines={1}
+              allowFontScaling={false}
+            >
+              {title}
+            </Text>
+          )}
           <View style={tw` w-[100%] rounded-lg  text-[#979797]`}>
             <ModalSelector
               data={items}

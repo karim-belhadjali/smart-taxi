@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import DestinationSvg from "../assets/svg/destinationSvg";
@@ -25,6 +26,7 @@ import {
   selectCurrentUser,
 } from "../app/slices/navigationSlice";
 import tw from "twrnc";
+import { moderateScale } from "../Metrics";
 const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
 
 const SearchPage = ({
@@ -40,6 +42,7 @@ const SearchPage = ({
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
   const currentLocation = useSelector(selectCurrentLocation);
+  const { width, height } = Dimensions.get("window");
 
   useEffect(() => {
     dispatch(
@@ -72,9 +75,12 @@ const SearchPage = ({
                 {
                   fontFamily: "Poppins-SemiBold",
                   letterSpacing: 0.3,
-                  fontSize: 20,
+                  fontSize: width * 0.055,
                 },
               ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+              allowFontScaling={false}
             >
               Entrer votre destination
             </Text>
@@ -92,7 +98,19 @@ const SearchPage = ({
 
               <View style={tw`m-2 bg-transparent w-[70%]`} focusable={true}>
                 <View style={[tw``, toInputBoxStyles.container]}>
-                  <Text style={tw`ml-[10] opacity-50`}>Votre emplacement</Text>
+                  <Text
+                    style={[
+                      tw`ml-[10] opacity-50`,
+                      {
+                        fontSize: width * 0.037,
+                      },
+                    ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    allowFontScaling={false}
+                  >
+                    Votre emplacement
+                  </Text>
                 </View>
                 <GooglePlacesAutocomplete
                   placeholder="Où voulez-vous aller?"
@@ -120,7 +138,6 @@ const SearchPage = ({
                       })
                     );
                     handledestination(data.description);
-                    // navigation.navigate("RideOptionsCard");
                   }}
                 />
               </View>
@@ -143,8 +160,14 @@ const SearchPage = ({
                 <Text
                   style={[
                     tw`opacity-30 mx-8 mt-3`,
-                    { fontFamily: "Poppins-Regular", fontSize: 15 },
+                    {
+                      fontFamily: "Poppins-Regular",
+                      fontSize: width * 0.04,
+                    },
                   ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
                 >
                   Ajouter Domicile
                 </Text>
@@ -170,8 +193,14 @@ const SearchPage = ({
                 <Text
                   style={[
                     tw`opacity-30 mx-8 mt-3`,
-                    { fontFamily: "Poppins-Regular", fontSize: 15 },
+                    {
+                      fontFamily: "Poppins-Regular",
+                      fontSize: width * 0.04,
+                    },
                   ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
                 >
                   Ajouter Travail
                 </Text>
@@ -185,7 +214,11 @@ const SearchPage = ({
         </KeyboardAvoidingView>
         {destination && (
           <TouchableOpacity
-            style={tw`absolute w-screen flex items-center justify-center bottom-2 ios:bottom-10`}
+            style={[
+              tw`absolute w-screen flex items-center justify-center bottom-[${
+                Dimensions.get("window").height < 720 ? 8 : 2
+              }] ios:bottom-10`,
+            ]}
             onPress={() => {
               handleSearch();
             }}
@@ -206,8 +239,14 @@ const SearchPage = ({
               <Text
                 style={[
                   tw`mt-1`,
-                  { fontFamily: "Poppins-Regular", fontSize: 18 },
+                  {
+                    fontFamily: "Poppins-Regular",
+                    fontSize: width * 0.05,
+                  },
                 ]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                allowFontScaling={false}
               >
                 Rechercher
               </Text>
@@ -250,10 +289,10 @@ const toInputBoxStyle2 = StyleSheet.create({
   },
   textInput: {
     backgroundColor: "transparent",
-    fontSize: 15,
     paddingTop: 10,
     height: 35,
     opacity: 1,
+    fontSize: Dimensions.get("window").width * 0.04,
   },
   textInputContainer: {
     paddingBottom: 0,
@@ -265,13 +304,13 @@ const toInputBoxStyles = StyleSheet.create({
     flex: 0,
     opacity: 0.5,
     borderRadius: 5,
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.04,
     paddingTop: 10,
     height: 35,
   },
   textInput: {
     backgroundColor: "transparent",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.04,
     paddingTop: 10,
     height: 35,
     opacity: 1,

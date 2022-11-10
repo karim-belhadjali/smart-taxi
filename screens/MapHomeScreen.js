@@ -49,8 +49,10 @@ import FinishedPage from "../components/FinishedPage";
 import { useNavigation } from "@react-navigation/core";
 import MapCarSvg from "../assets/svg/MapCarSvg";
 import UserLocationSvg from "../assets/svg/UserLocationSvg";
+import { moderateScale } from "../Metrics";
 
 const MapHomeScreen = () => {
+  const { width, height } = Dimensions.get("window");
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
@@ -584,9 +586,10 @@ const MapHomeScreen = () => {
             <Text
               style={[
                 tw`mt-3 mx-3`,
-                { fontFamily: "Poppins-Bold", fontSize: 20 },
+                { fontFamily: "Poppins-Bold", fontSize: width * 0.05 },
               ]}
               numberOfLines={1}
+              allowFontScaling={false}
             >
               {user?.fullName}
             </Text>
@@ -616,8 +619,13 @@ const MapHomeScreen = () => {
           <Text
             style={[
               tw`absolute bottom-2 left-10`,
-              { fontFamily: "Poppins-SemiBold", fontSize: 15, opacity: 0.5 },
+              {
+                fontFamily: "Poppins-SemiBold",
+                fontSize: width * 0.04,
+                opacity: 0.5,
+              },
             ]}
+            allowFontScaling={false}
           >
             Beem 2022 - Version 1.0
           </Text>

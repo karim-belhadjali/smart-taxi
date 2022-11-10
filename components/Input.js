@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, View } from "react-native";
+import { Dimensions, StyleSheet, TextInput, View } from "react-native";
 import React, { useState } from "react";
 import tw from "twrnc";
 
@@ -8,6 +8,7 @@ import { useRef } from "react";
 const Input = ({ placeHolder, value, onChangeText }) => {
   const [borderColor, setborderColor] = useState("#979797");
   const ref = useRef();
+  const { width, height } = Dimensions.get("window");
   return (
     <View
       style={[
@@ -27,13 +28,15 @@ const Input = ({ placeHolder, value, onChangeText }) => {
             ref.current.blur();
           }
         }}
-        style={tw`flex-1`}
+        style={[tw`flex-1`, { fontSize: width * 0.03 }]}
+        numberOfLines={1}
         keyboardType="number-pad"
         blurOnSubmit={true}
         onFocus={() => {
           setborderColor("#F74C00");
         }}
         onBlur={() => setborderColor("")}
+        allowFontScaling={false}
       />
     </View>
   );

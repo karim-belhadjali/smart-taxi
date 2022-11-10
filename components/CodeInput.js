@@ -26,6 +26,7 @@ const CodeInput = ({ index, active, onChange }) => {
         textContentType="telephoneNumber"
         onChangeText={(codeNumber) => handleChange(codeNumber)}
         maxLength={1}
+        allowFontScaling={false}
       />
     </View>
   );

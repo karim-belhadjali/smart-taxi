@@ -1,11 +1,21 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React from "react";
 import tw from "twrnc";
 import CarSvg from "../../assets/svg/CarSvg";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import * as Linking from "expo-linking";
+import { moderateScale } from "../../Metrics";
 
 const WaitingRide = ({ ride, onCall }) => {
+  const { width, height } = Dimensions.get("window");
+
   let place;
   if (ride?.origin.description === "inconnu") {
     place = "votre emplacement";
@@ -31,9 +41,14 @@ const WaitingRide = ({ ride, onCall }) => {
       <Text
         style={[
           tw`mt-1 ml-5 w-90`,
-          { fontFamily: "Poppins-Regular", fontSize: 15 },
+          {
+            fontFamily: "Poppins-Regular",
+            fontSize: width * 0.04,
+          },
         ]}
         numberOfLines={1}
+        adjustsFontSizeToFit
+        allowFontScaling={false}
       >
         Rendez-vous a {place}
       </Text>
@@ -51,24 +66,58 @@ const WaitingRide = ({ ride, onCall }) => {
               tw`pt-2`,
               {
                 fontFamily: "Poppins-SemiBold",
-                fontSize: 15,
+                fontSize: width * 0.04,
                 color: "#979797",
               },
             ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
           >
             {ride?.driverInfo.carType}
           </Text>
         </View>
         <View style={tw`w-[50%] pl-10`}>
           <Text
-            style={[tw``, { fontFamily: "Poppins-SemiBold", fontSize: 20 }]}
+            style={[
+              tw``,
+              {
+                fontFamily: "Poppins-SemiBold",
+                fontSize: width * 0.05,
+              },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
           >
             {ride?.driverInfo.name}
           </Text>
-          <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
+          <Text
+            style={[
+              tw``,
+              {
+                fontFamily: "Poppins-Light",
+                fontSize: width * 0.03,
+              },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
+          >
             En route
           </Text>
-          <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
+          <Text
+            style={[
+              tw``,
+              {
+                fontFamily: "Poppins-Bold",
+                fontSize: width * 0.05,
+              },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
+          >
             {ride?.price} TND
           </Text>
         </View>
@@ -79,7 +128,9 @@ const WaitingRide = ({ ride, onCall }) => {
         onPress={() => Linking.openURL(`tel:+216 ${ride?.driverInfo?.phone}`)}
       >
         <FontAwesome name="phone" size={35} color="#431879" />
-        <Text style={styles.btnAnnuler}>Appel Driver</Text>
+        <Text style={styles.btnAnnuler} allowFontScaling={false}>
+          Appel Driver
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -90,7 +141,7 @@ export default WaitingRide;
 const styles = StyleSheet.create({
   btnAnnuler: {
     fontFamily: "Poppins-SemiBold",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.04,
     color: "#431879",
     marginLeft: 20,
   },

@@ -1,4 +1,5 @@
 import {
+  Dimensions,
   StatusBar,
   StyleSheet,
   Text,
@@ -12,8 +13,11 @@ import { useNavigation } from "@react-navigation/core";
 
 import tw from "twrnc";
 import AboutItem from "../components/AboutItem";
+import { moderateScale } from "../Metrics";
 
 const AboutScreen = () => {
+  const { width, height } = Dimensions.get("window");
+
   const navigation = useNavigation();
   const [currentScreen, setcurrentScreen] = useState("main");
   const handleReturn = () => {
@@ -24,14 +28,22 @@ const AboutScreen = () => {
   return (
     <View style={tw`flex w-screen h-screen bg-white`}>
       <View style={tw`flex items-start ml-5 mt-5`}>
-        <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
+        <Text
+          style={[tw``, { fontFamily: "Poppins-Bold", fontSize: width * 0.06 }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
+        >
           À propos
         </Text>
         <Text
           style={[
             tw`opacity-60`,
-            { fontFamily: "Poppins-Light", fontSize: 15 },
+            { fontFamily: "Poppins-Light", fontSize: width * 0.04 },
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          allowFontScaling={false}
         >
           Version 1.0
         </Text>
@@ -41,7 +53,11 @@ const AboutScreen = () => {
       <AboutItem
         key={"Rate App"}
         style={tw`my-5`}
-        fontStyle={{ fontFamily: "Poppins-Light", fontSize: 18, opacity: 0.4 }}
+        fontStyle={{
+          fontFamily: "Poppins-Light",
+          fontSize: moderateScale(18),
+          opacity: 0.4,
+        }}
         iconStyle={{ opacity: 0.4 }}
         text="Rate App"
       />
@@ -49,7 +65,11 @@ const AboutScreen = () => {
       <AboutItem
         key={"Smart Careers"}
         style={tw`my-5`}
-        fontStyle={{ fontFamily: "Poppins-Light", fontSize: 18, opacity: 0.4 }}
+        fontStyle={{
+          fontFamily: "Poppins-Light",
+          fontSize: moderateScale(18),
+          opacity: 0.4,
+        }}
         iconStyle={{ opacity: 0.4 }}
         text="Smart Careers"
       />
@@ -58,7 +78,7 @@ const AboutScreen = () => {
       <AboutItem
         key={"Terms and conditions"}
         style={tw`my-5`}
-        fontStyle={{ fontFamily: "Poppins-Light", fontSize: 18 }}
+        fontStyle={{ fontFamily: "Poppins-Light", fontSize: moderateScale(18) }}
         iconStyle={{ opacity: 1 }}
         text="Terms and conditions"
       />

@@ -1,9 +1,19 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React from "react";
 import tw from "twrnc";
 import CarSvg from "../../assets/svg/CarSvg";
+import { moderateScale } from "../../Metrics";
 
 const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
+  const { width, height } = Dimensions.get("window");
+
   let place;
   if (rideInfo?.place === "inconnu") {
     place = "votre emplacement";
@@ -29,9 +39,14 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
       <Text
         style={[
           tw`mt-1 pr-10`,
-          { fontFamily: "Poppins-Regular", fontSize: 15 },
+          {
+            fontFamily: "Poppins-Regular",
+            fontSize: width * 0.08,
+          },
         ]}
+        adjustsFontSizeToFit
         numberOfLines={1}
+        allowFontScaling={false}
       >
         Rendez-vous a {place}
       </Text>
@@ -45,15 +60,46 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
         <CarSvg />
         <View style={tw`w-[50%] pl-10`}>
           <Text
-            style={[tw``, { fontFamily: "Poppins-SemiBold", fontSize: 20 }]}
+            style={[
+              tw`mt-1`,
+              {
+                fontFamily: "Poppins-SemiBold",
+                fontSize: width * 0.05,
+              },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
           >
             {rideInfo?.driverName}
           </Text>
-          <Text style={[tw``, { fontFamily: "Poppins-Light", fontSize: 10 }]}>
+          <Text
+            style={[
+              tw`mt-1`,
+              {
+                fontFamily: "Poppins-Light",
+                fontSize: width * 0.03,
+              },
+            ]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
+          >
             Arrive dans {rideInfo?.time}
           </Text>
           {!isNaN(rideInfo?.price) && (
-            <Text style={[tw``, { fontFamily: "Poppins-Bold", fontSize: 20 }]}>
+            <Text
+              style={[
+                tw`mt-1`,
+                {
+                  fontFamily: "Poppins-Bold",
+                  fontSize: width * 0.05,
+                },
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              allowFontScaling={false}
+            >
               {rideInfo?.price} TND
             </Text>
           )}
@@ -66,13 +112,27 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
           style={tw`rounded-full bg-[#fff] w-[43%] border-[#431879] border-2 p-4 flex justify-center items-center`}
           onPress={onCancel}
         >
-          <Text style={styles.btnAnnuler}>Annuler</Text>
+          <Text
+            style={styles.btnAnnuler}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
+          >
+            Annuler
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={tw`rounded-full bg-[#431879] w-[51%] border-[#431879]  p-4 flex justify-center items-center`}
           onPress={onConfirm}
         >
-          <Text style={styles.btn}>Confirmer</Text>
+          <Text
+            style={styles.btn}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            allowFontScaling={false}
+          >
+            Confirmer
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -84,12 +144,12 @@ export default ConfirmRide;
 const styles = StyleSheet.create({
   btn: {
     fontFamily: "Poppins-SemiBold",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.04,
     color: "#fff",
   },
   btnAnnuler: {
     fontFamily: "Poppins-SemiBold",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.04,
     color: "#431879",
   },
 });

@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   StatusBar,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { signInAnonymously, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -22,10 +23,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/core";
 import TunisiaSvg from "../assets/svg/TunisiaSvg";
 import NextBtn from "../components/NextBtn";
+import { moderateScale } from "../Metrics";
 
 const OTP_KEY = "b86a2a1a-5a08-48a4-8071-dea8dfcbb752";
 
 const LoginScreen = () => {
+  const { width, height } = Dimensions.get("window");
+
   let timeout;
   const [disabled, setdisabled] = useState(true);
   // Code Ref management hooks
@@ -50,8 +54,6 @@ const LoginScreen = () => {
   const [codeNumber2, setcodeNumber2] = useState();
   const [codeNumber3, setcodeNumber3] = useState();
   const [codeNumber4, setcodeNumber4] = useState();
-  const [codeNumber5, setcodeNumber5] = useState();
-  const [codeNumber6, setcodeNumber6] = useState();
 
   //redux
   const dispatch = useDispatch();
@@ -245,26 +247,34 @@ const LoginScreen = () => {
       {!waiting && (
         <KeyboardAvoidingView
           style={tw`flex items-center h-screen w-screen pt-15 px-4 mt-[${statusbarheight}] bg-[#FFFFFF]`}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           {!verifycode && (
             <>
               <View style={tw`flex items-start  my-4`}>
-                <Text style={styles.title}>Entrer votre numéro</Text>
-                <Text style={styles.subtitle}>
+                <Text
+                  style={styles.title}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
+                >
+                  Entrer votre numéro
+                </Text>
+                <Text style={styles.subtitle} allowFontScaling={false}>
                   Vous allez recevoir un code de verification sur votre numéro
                   de téléphone.
                 </Text>
               </View>
               <View
                 style={[
-                  tw`border-2 w-full my-10  p-4 border-[${phonebordercolor}] flex-row justify-between rounded-md `,
+                  tw`border-2 w-full my-5  p-4 border-[${phonebordercolor}] flex-row justify-between rounded-md `,
                   styles.phoneContainer,
                 ]}
               >
                 <View style={tw`flex-row`}>
                   <TunisiaSvg style={tw`mt-[5]`} />
-                  <Text style={styles.number}>+216</Text>
+                  <Text style={styles.number} allowFontScaling={false}>
+                    +216
+                  </Text>
                 </View>
                 <View style={tw`h-full border-[0.15] mx-6 `} />
                 <TextInput
@@ -280,6 +290,7 @@ const LoginScreen = () => {
                       tel.current.blur();
                     }
                   }}
+                  allowFontScaling={false}
                   onFocus={() => setphonebordercolor("#FAC100")}
                   onBlur={() => setphonebordercolor("#431879")}
                 />
@@ -287,6 +298,7 @@ const LoginScreen = () => {
               {message && (
                 <Text
                   style={{ fontFamily: "Poppins-Regular", color: "#F74C00" }}
+                  allowFontScaling={false}
                 >
                   {message.text}
                 </Text>
@@ -298,25 +310,44 @@ const LoginScreen = () => {
           {verifycode && (
             <>
               <View style={tw`flex items-start w-full ml-[15%] `}>
-                <Text style={styles.title}>Entrer votre code</Text>
-                <Text style={[tw`my-2`, styles.subSubtitle]}>
+                <Text
+                  style={styles.title}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
+                >
+                  Entrer votre code
+                </Text>
+                <Text
+                  style={[tw`my-2`, styles.subSubtitle]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
+                >
                   Le code SMS a été envoyer à
                 </Text>
-                <Text style={styles.subtitleNumber}>+216 {phoneNumber}</Text>
+                <Text style={styles.subtitleNumber} allowFontScaling={false}>
+                  +216 {phoneNumber}
+                </Text>
               </View>
               <View style={[tw`w-full items-start mt-10 `]}>
                 <Text
                   style={[
                     tw`text-[#F74C00] underline ml-[9%] `,
-                    { fontSize: 16 },
+                    {
+                      fontSize: moderateScale(16),
+                    },
                   ]}
                   onPress={() => setverifycode(false)}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
                 >
                   Modifier mon numéro
                 </Text>
                 <View style={[tw`flex-row w-full px-3 mt-4  justify-evenly`]}>
                   <TouchableOpacity
-                    style={tw`border border-[${border1}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    style={tw`border border-[${border1}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center overflow-visible`}
                     activeOpacity={1}
                     onPress={() => {
                       code1.current.focus();
@@ -335,6 +366,7 @@ const LoginScreen = () => {
                       onBlur={() => setborder1("#979797")}
                       blurOnSubmit={false}
                       textContentType="telephoneNumber"
+                      allowFontScaling={false}
                       onChangeText={(codeNumber) => {
                         if (codeNumber.length === 1) {
                           code2.current.focus();
@@ -347,7 +379,7 @@ const LoginScreen = () => {
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={tw`border border-[${border2}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    style={tw`border border-[${border2}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center overflow-visible `}
                     activeOpacity={1}
                     onPress={() => {
                       code2.current.focus();
@@ -367,6 +399,7 @@ const LoginScreen = () => {
                       blurOnSubmit={false}
                       focusable
                       textContentType="telephoneNumber"
+                      allowFontScaling={false}
                       onChangeText={(codeNumber) => {
                         if (codeNumber.length === 1) {
                           code3.current.focus();
@@ -379,7 +412,7 @@ const LoginScreen = () => {
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={tw`border border-[${border3}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    style={tw`border border-[${border3}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center  overflow-visible`}
                     activeOpacity={1}
                     onPress={() => {
                       code3.current.focus();
@@ -408,10 +441,11 @@ const LoginScreen = () => {
                         }
                       }}
                       maxLength={1}
+                      allowFontScaling={false}
                     />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={tw`border border-[${border4}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center `}
+                    style={tw`border border-[${border4}] rounded-lg mx-1 w-18 h-[13] flex justify-center items-center overflow-visible `}
                     activeOpacity={1}
                     onPress={() => {
                       code4.current.focus();
@@ -440,6 +474,7 @@ const LoginScreen = () => {
                         }
                       }}
                       maxLength={1}
+                      allowFontScaling={false}
                     />
                   </TouchableOpacity>
                 </View>
@@ -449,6 +484,7 @@ const LoginScreen = () => {
                       tw`px-5 mt-5`,
                       { fontFamily: "Poppins-Regular", color: "#F74C00" },
                     ]}
+                    allowFontScaling={false}
                   >
                     {error.text}
                   </Text>
@@ -468,8 +504,14 @@ const LoginScreen = () => {
                       tw`mb-8 ml-5 text-[#F74C00] ${
                         disabled === true ? "opacity-40" : "opacity-100"
                       }`,
-                      { fontSize: 14, fontFamily: "Poppins-SemiBold" },
+                      {
+                        fontSize: moderateScale(14),
+                        fontFamily: "Poppins-SemiBold",
+                      },
                     ]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    allowFontScaling={false}
                   >
                     Renvoyez le code
                   </Text>
@@ -513,7 +555,9 @@ const LoginScreen = () => {
                     }
                   }}
                 >
-                  <Text style={styles.btn}>Verifier</Text>
+                  <Text style={styles.btn} allowFontScaling={false}>
+                    Verifier
+                  </Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -547,28 +591,28 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   title: {
     fontFamily: "Poppins-SemiBold",
-    fontSize: 28,
+    fontSize: Dimensions.get("window").width * 0.08,
   },
   subtitle: {
     fontFamily: "Poppins-Regular",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.05,
   },
   subSubtitle: {
     fontFamily: "Poppins-Light",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.05,
   },
   subtitleNumber: {
     fontFamily: "Poppins-Bold",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.05,
   },
   number: {
     fontFamily: "Poppins-Light",
     marginLeft: 20,
-    fontSize: 20,
+    fontSize: Dimensions.get("window").width * 0.06,
   },
   numbers: {
     fontFamily: "Poppins-Light",
-    fontSize: 20,
+    fontSize: Dimensions.get("window").width * 0.06,
   },
   phoneContainer: {
     marginLeft: 20,
@@ -576,7 +620,7 @@ const styles = StyleSheet.create({
   },
   btn: {
     fontFamily: "Poppins-SemiBold",
-    fontSize: 15,
+    fontSize: Dimensions.get("window").width * 0.05,
     color: "#fff",
   },
 });
