@@ -28,7 +28,7 @@ const Input = ({ placeHolder, value, onChangeText }) => {
             ref.current.blur();
           }
         }}
-        style={[tw`flex-1`, { fontSize: width * 0.03 }]}
+        style={[tw`flex-1`, { fontSize: width * 0.04 }]}
         numberOfLines={1}
         keyboardType="number-pad"
         blurOnSubmit={true}

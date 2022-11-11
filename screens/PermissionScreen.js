@@ -10,6 +10,7 @@ import {
   Image,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 
 import * as Location from "expo-location";
@@ -22,15 +23,22 @@ import {
   selectCurrentLocation,
   setCurrentLocation,
   setCurrentUser,
+  setVersion,
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import { useFonts } from "expo-font";
 import LogoSvg from "../assets/svg/LogoSvg";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
+
+import AppLink from "react-native-app-link";
 
 export default function App() {
   const navigation = useNavigation();
+
+  const version = "1.0.4";
 
   const [reload, setreload] = useState(false);
   const dispatch = useDispatch();
@@ -85,7 +93,7 @@ export default function App() {
                   description: adress,
                 })
               );
-              await getUser("Client");
+              await getVersion();
             })
             .catch((e) => {
               setreload(!reload);
@@ -146,6 +154,40 @@ export default function App() {
       });
     }
   };
+  const getVersion = async () => {
+    const docRef = doc(db, "versions", "kLJoU0er6GIOQoLVh9gU");
+    const docSnap = await getDoc(docRef);
+    if (docSnap?.exists()) {
+      if (docSnap.data().name === version) {
+        dispatch(setVersion(version));
+        await getUser("Client");
+      } else {
+        Alert.alert(
+          "Nouvelle mise à jour détectée",
+          "Nouvelle mise à jour détectée, veuillez mettre à jour l'application vers la dernière version",
+          [
+            {
+              text: "Mettre à jour",
+              onPress: () => {
+                AppLink.openInStore({
+                  appName: "Smart Taxi",
+                  playStoreId: "com.karim.belhadjali.smarttaxi",
+                });
+              },
+            },
+            {
+              text: "Réessayer",
+              onPress: () => {
+                setreload(!reload);
+              },
+            },
+          ]
+        );
+      }
+    } else {
+      await getUser("Client");
+    }
+  };
 
   const handleTryAgain = () => {
     setreload(!reload);
@@ -156,6 +198,7 @@ export default function App() {
         style={tw`flex justify-center items-center overflow-visible h-full`}
       >
         <LogoSvg style={tw`justify-center items-center `} />
+        <ActivityIndicator size={"large"} style={tw`mt-10`} color="#FFFFFF" />
       </View>
     </View>
   );

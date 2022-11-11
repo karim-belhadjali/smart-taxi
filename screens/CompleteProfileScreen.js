@@ -222,9 +222,18 @@ const CompleteProfileScreen = () => {
             })
             .catch((err) => {
               setcurrentStep("step1");
-              showerror({
-                text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
-              });
+
+              var errorCode = err.code;
+              var errorMessage = err.message;
+              if (errorCode == "auth/email-already-in-use") {
+                showerror({
+                  text: "Cet e-mail est déjà utilisée",
+                });
+              } else {
+                showerror({
+                  text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
+                });
+              }
             });
         })
         .catch(() => {
@@ -291,7 +300,7 @@ const CompleteProfileScreen = () => {
                 <Text
                   style={{
                     fontFamily: "Poppins-SemiBold",
-                    fontSize: width * 0.05,
+                    fontSize: width * 0.07,
                   }}
                   numberOfLines={1}
                   adjustsFontSizeToFit
@@ -390,10 +399,10 @@ const CompleteProfileScreen = () => {
                 style={{
                   width: "80%",
                   fontFamily: "Poppins-Regular",
-                  fontSize: width * 0.04,
-                  lineHeight: 30,
+                  fontSize: width * 0.05,
+                  lineHeight: 20,
                 }}
-                numberOfLines={2}
+                numberOfLines={3}
                 adjustsFontSizeToFit
                 allowFontScaling={false}
               >

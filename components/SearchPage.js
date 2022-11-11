@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -43,6 +43,7 @@ const SearchPage = ({
   const destination = useSelector(selectDestination);
   const currentLocation = useSelector(selectCurrentLocation);
   const { width, height } = Dimensions.get("window");
+  const [mapsBorder, setmapsBorder] = useState("transparent");
 
   useEffect(() => {
     dispatch(
@@ -100,9 +101,11 @@ const SearchPage = ({
                 <View style={[tw``, toInputBoxStyles.container]}>
                   <Text
                     style={[
-                      tw`ml-[10] opacity-50`,
+                      tw`ml-[5] opacity-50 text-[#000000]`,
                       {
                         fontSize: width * 0.037,
+                        fontFamily: "Poppins-SemiBold",
+                        color: "#000000",
                       },
                     ]}
                     numberOfLines={1}
@@ -128,8 +131,34 @@ const SearchPage = ({
                     onChange: (e) => {
                       handledestination(e.target.value);
                     },
+                    onFocus: () => {
+                      setmapsBorder("#431879");
+                    },
+                    onBlur: () => {
+                      setmapsBorder("transparent");
+                    },
                   }}
-                  styles={toInputBoxStyle2}
+                  styles={{
+                    container: {
+                      backgroundColor: "#CAC8C8",
+                      flex: 0,
+                      opacity: 0.8,
+                      borderRadius: 5,
+                      marginTop: 5,
+                      borderColor: mapsBorder,
+                      borderWidth: 1.5,
+                    },
+                    textInput: {
+                      backgroundColor: "transparent",
+                      paddingTop: 10,
+                      height: 35,
+                      opacity: 1,
+                      fontSize: Dimensions.get("window").width * 0.04,
+                    },
+                    textInputContainer: {
+                      paddingBottom: 0,
+                    },
+                  }}
                   onPress={(data, details = null) => {
                     dispatch(
                       setDestination({
@@ -283,9 +312,11 @@ const toInputBoxStyle2 = StyleSheet.create({
   container: {
     backgroundColor: "#CAC8C8",
     flex: 0,
-    opacity: 0.5,
+    opacity: 0.8,
     borderRadius: 5,
     marginTop: 5,
+    borderColor: "",
+    borderWidth: 1,
   },
   textInput: {
     backgroundColor: "transparent",
@@ -300,16 +331,15 @@ const toInputBoxStyle2 = StyleSheet.create({
 });
 const toInputBoxStyles = StyleSheet.create({
   container: {
-    backgroundColor: "#CAC8C8",
+    // backgroundColor: "#CAC8C8",
     flex: 0,
-    opacity: 0.5,
+    // opacity: 0.5,
     borderRadius: 5,
     fontSize: Dimensions.get("window").width * 0.04,
     paddingTop: 10,
     height: 35,
   },
   textInput: {
-    backgroundColor: "transparent",
     fontSize: Dimensions.get("window").width * 0.04,
     paddingTop: 10,
     height: 35,

@@ -73,8 +73,7 @@ const LoginScreen = () => {
     myHeaders.append("Content-Type", "application/json");
 
     var raw = JSON.stringify({
-      messageFormat:
-        "${otp} est votre code de securité beem. Ce code expirera dans 2 minutes.",
+      messageFormat: "Beem: ${otp} est votre code de confirmation.",
       phoneNumber: `+216${phoneNumber}`,
       otpLength: 4,
       otpValidityInSeconds: 120,
@@ -205,7 +204,7 @@ const LoginScreen = () => {
         })
         .catch((error) => {
           setwaiting(false);
-
+          console.log(error);
           seterror({
             text: "Impossible de se connecter assurez-vous que votre connexion Internet fonctionne, si le problème persiste contactez le support",
           });
