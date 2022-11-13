@@ -38,7 +38,7 @@ import AppLink from "react-native-app-link";
 export default function App() {
   const navigation = useNavigation();
 
-  const version = "1.0.4";
+  const version = "1.0.5";
 
   const [reload, setreload] = useState(false);
   const dispatch = useDispatch();
@@ -171,7 +171,7 @@ export default function App() {
               onPress: () => {
                 AppLink.openInStore({
                   appName: "Smart Taxi",
-                  playStoreId: "com.karim.belhadjali.smarttaxi",
+                  playStoreId: "com.beem.smarttaxi",
                 });
               },
             },

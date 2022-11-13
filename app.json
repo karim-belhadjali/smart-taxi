@@ -2,7 +2,7 @@
   "expo": {
     "name": "smart-taxi",
     "slug": "smart-taxi",
-    "version": "1.0.0",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -28,7 +28,7 @@
       "config": {
         "googleMaps": { "apiKey": "AIzaSyC68H_H39puGTSmrl2XNhS2d9I7YXIn3fo" }
       },
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
