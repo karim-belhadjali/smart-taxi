@@ -30,7 +30,7 @@ import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import { useFonts } from "expo-font";
 import LogoSvg from "../assets/svg/LogoSvg";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 import AppLink from "react-native-app-link";
@@ -170,7 +170,7 @@ export default function App() {
               text: "Mettre à jour",
               onPress: () => {
                 AppLink.openInStore({
-                  appName: "Smart Taxi",
+                  appName: "Beem Smart Taxi",
                   playStoreId: "com.beem.smarttaxi",
                 });
               },
@@ -198,7 +198,7 @@ export default function App() {
         style={tw`flex justify-center items-center overflow-visible h-full`}
       >
         <LogoSvg style={tw`justify-center items-center `} />
-        <ActivityIndicator size={"large"} style={tw`mt-10`} color="#FFFFFF" />
+        <ActivityIndicator size={"large"} style={tw`mt-10`} color="#7A3BFF" />
       </View>
     </View>
   );
@@ -210,6 +210,6 @@ const stylesheet = StyleSheet.create({
     left: 0,
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height + StatusBar.currentHeight,
-    backgroundColor: "#431879",
+    backgroundColor: "#fff",
   },
 });

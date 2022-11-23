@@ -38,14 +38,14 @@ const ConfirmRide = ({ rideInfo, onCancel, onConfirm }) => {
     >
       <Text
         style={[
-          tw`mt-1 pr-10`,
+          tw`mt-1 ml-5 w-90`,
           {
             fontFamily: "Poppins-Regular",
-            fontSize: width * 0.08,
+            fontSize: width * 0.04,
           },
         ]}
-        adjustsFontSizeToFit
         numberOfLines={1}
+        adjustsFontSizeToFit
         allowFontScaling={false}
       >
         Rendez-vous a {place}

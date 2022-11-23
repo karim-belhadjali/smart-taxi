@@ -101,7 +101,7 @@ const SearchPage = ({
                 <View style={[tw``, toInputBoxStyles.container]}>
                   <Text
                     style={[
-                      tw`ml-[5] opacity-50 text-[#000000]`,
+                      tw`ml-2 opacity-50 text-[#000000]`,
                       {
                         fontSize: width * 0.037,
                         fontFamily: "Poppins-SemiBold",
@@ -132,7 +132,7 @@ const SearchPage = ({
                       handledestination(e.target.value);
                     },
                     onFocus: () => {
-                      setmapsBorder("#431879");
+                      setmapsBorder("rgba(247, 76, 0, 1)");
                     },
                     onBlur: () => {
                       setmapsBorder("transparent");
@@ -140,9 +140,8 @@ const SearchPage = ({
                   }}
                   styles={{
                     container: {
-                      backgroundColor: "#CAC8C8",
+                      backgroundColor: "rgba(202, 200, 200, 0.3)",
                       flex: 0,
-                      opacity: 0.8,
                       borderRadius: 5,
                       marginTop: 5,
                       borderColor: mapsBorder,
@@ -154,6 +153,7 @@ const SearchPage = ({
                       height: 35,
                       opacity: 1,
                       fontSize: Dimensions.get("window").width * 0.04,
+                      color: "#000000",
                     },
                     textInputContainer: {
                       paddingBottom: 0,

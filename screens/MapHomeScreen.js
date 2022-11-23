@@ -16,6 +16,7 @@ import {
   selectCurrentLocation,
   selectCurrentUser,
   selectDriverLocation,
+  selectVersion,
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -50,6 +51,7 @@ import { useNavigation } from "@react-navigation/core";
 import MapCarSvg from "../assets/svg/MapCarSvg";
 import UserLocationSvg from "../assets/svg/UserLocationSvg";
 import { moderateScale } from "../Metrics";
+import CanceledPage from "../components/CanceledPage";
 
 const MapHomeScreen = () => {
   const { width, height } = Dimensions.get("window");
@@ -61,6 +63,7 @@ const MapHomeScreen = () => {
   const currentLocation = useSelector(selectCurrentLocation);
   const travelTimeInfo = useSelector(selectTravelTimeInfo);
   const driverLocation = useSelector(selectDriverLocation);
+  const version = useSelector(selectVersion);
   const user = useSelector(selectCurrentUser);
   const mapRef = useRef(null);
 
@@ -291,34 +294,65 @@ const MapHomeScreen = () => {
     const unsub = onSnapshot(
       doc(db, "Current Courses", currentUser?.phone),
       async (current) => {
-        const request = current.data();
-
-        if (!request.finished) {
-          dispatch(setDriverLocation(request?.driverInfo?.location));
-        }
-        if (request.driverArrived && request.driveStarted === false) {
-          setDoc(
-            doc(db, "Current Courses", currentUser?.phone),
-            { driveStarted: true },
-            {
-              merge: true,
-            }
-          )
-            .then(() => {
-              setcurrentRide(request);
-              setsubstep("onGoing");
-              dispatch(setOrigin(null));
-            })
-            .catch((err) => {});
-        } else if (request.finished) {
-          setcurrentStep("finished");
+        if (!current.exists()) {
+          setcurrentStep("canceled");
           setsubstep("search");
           dispatch(setDriverLocation(null));
           dispatch(setDestination(null));
           unsub();
+        } else {
+          const request = current.data();
+
+          if (!request.finished) {
+            dispatch(setDriverLocation(request?.driverInfo?.location));
+          }
+          if (request.driverArrived && request.driveStarted === false) {
+            setDoc(
+              doc(db, "Current Courses", currentUser?.phone),
+              { driveStarted: true },
+              {
+                merge: true,
+              }
+            )
+              .then(() => {
+                setcurrentRide(request);
+                setsubstep("onGoing");
+                dispatch(setOrigin(null));
+              })
+              .catch((err) => {});
+          } else if (request.finished) {
+            setcurrentStep("finished");
+            setsubstep("search");
+            dispatch(setDriverLocation(null));
+            dispatch(setDestination(null));
+            unsub();
+          } else if (request.canceledByDriver) {
+            setcurrentStep("canceled");
+            setsubstep("search");
+            dispatch(setDriverLocation(null));
+            dispatch(setDestination(null));
+            unsub();
+          }
         }
       }
     );
+  };
+
+  const handleCancelCurrentRide = () => {
+    setDoc(
+      doc(db, "Current Courses", currentUser?.phone),
+      {
+        canceledByClient: true,
+      },
+      { merge: true }
+    )
+      .then(async () => {
+        setcurrentStep("canceled");
+        setsubstep("search");
+        dispatch(setDriverLocation(null));
+        dispatch(setDestination(null));
+      })
+      .catch((err) => {});
   };
 
   const calculatePrice = async (distanceClient, distanceDriver) => {
@@ -374,6 +408,7 @@ const MapHomeScreen = () => {
     >
       {currentStep !== "confirm" &&
         currentStep !== "finished" &&
+        currentStep !== "canceled" &&
         currentStep !== "search" &&
         !displayMenu &&
         searching === false && (
@@ -543,6 +578,7 @@ const MapHomeScreen = () => {
             <WaitingRide
               ride={currentRide}
               onCall={() => setsubstep("onGoing")}
+              cancelRide={handleCancelCurrentRide}
             />
           )}
           {substep === "onGoing" && (
@@ -558,6 +594,18 @@ const MapHomeScreen = () => {
       )}
       {currentStep == "finished" && (
         <FinishedPage
+          ride={currentRide}
+          OnFinish={() => {
+            setdestinationText("");
+            setoriginText("");
+            setcurrentStep("home");
+            setsubstep("search");
+            setcurrentRide(null);
+          }}
+        />
+      )}
+      {currentStep == "canceled" && (
+        <CanceledPage
           ride={currentRide}
           OnFinish={() => {
             setdestinationText("");
@@ -627,7 +675,7 @@ const MapHomeScreen = () => {
             ]}
             allowFontScaling={false}
           >
-            Beem 2022 - Version 1.0
+            Beem 2022 - Version {version}
           </Text>
         </View>
         <Animated.View style={[tw`bg-[#000000] w-[25%]`, { opacity: opacity }]}>

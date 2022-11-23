@@ -1,4 +1,5 @@
 import {
+  Alert,
   Dimensions,
   Image,
   StyleSheet,
@@ -13,7 +14,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import * as Linking from "expo-linking";
 import { moderateScale } from "../../Metrics";
 
-const WaitingRide = ({ ride, onCall }) => {
+const WaitingRide = ({ ride, onCall, cancelRide }) => {
   const { width, height } = Dimensions.get("window");
 
   let place;
@@ -122,16 +123,39 @@ const WaitingRide = ({ ride, onCall }) => {
           </Text>
         </View>
       </View>
-
-      <TouchableOpacity
-        style={tw`rounded-full bg-[#fff] h-[15] w-[80] border-[#431879] border-2 p-2 flex flex-row justify-center items-center`}
-        onPress={() => Linking.openURL(`tel:+216 ${ride?.driverInfo?.phone}`)}
-      >
-        <FontAwesome name="phone" size={35} color="#431879" />
-        <Text style={styles.btnAnnuler} allowFontScaling={false}>
-          Appel Driver
-        </Text>
-      </TouchableOpacity>
+      <View style={tw`flex flex-row items-center justify-around w-full mt-2`}>
+        <TouchableOpacity
+          style={tw`rounded-full bg-[#fff] h-[11] w-50% border-[#66CFC7] border-2 p-2 flex flex-row justify-center items-center`}
+          onPress={() => Linking.openURL(`tel:+216 ${ride?.driverInfo?.phone}`)}
+        >
+          <FontAwesome name="phone" size={20} color="#66CFC7" />
+          <Text style={styles.btnappel} allowFontScaling={false}>
+            Appel Driver
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={tw`rounded-full bg-[#fff] h-[11] w-40% border-[#979797] border-2 p-2 flex flex-row justify-center items-center`}
+          onPress={() => {
+            Alert.alert("Annuler la course", "voulez-vous annuler la course?", [
+              {
+                text: "retour",
+                onPress: () => {},
+              },
+              {
+                text: "Annuler la course",
+                onPress: () => {
+                  cancelRide();
+                },
+                style: "cancel",
+              },
+            ]);
+          }}
+        >
+          <Text style={styles.btnAnnuler} allowFontScaling={false}>
+            Annuler
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -139,10 +163,14 @@ const WaitingRide = ({ ride, onCall }) => {
 export default WaitingRide;
 
 const styles = StyleSheet.create({
+  btnappel: {
+    fontFamily: "Poppins-SemiBold",
+    fontSize: Dimensions.get("window").width * 0.035,
+    color: "#66CFC7",
+    marginLeft: 20,
+  },
   btnAnnuler: {
     fontFamily: "Poppins-SemiBold",
-    fontSize: Dimensions.get("window").width * 0.04,
-    color: "#431879",
-    marginLeft: 20,
+    fontSize: Dimensions.get("window").width * 0.035,
   },
 });
