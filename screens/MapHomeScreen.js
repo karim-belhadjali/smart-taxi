@@ -50,7 +50,8 @@ import FinishedPage from "../components/FinishedPage";
 import { useNavigation } from "@react-navigation/core";
 import MapCarSvg from "../assets/svg/MapCarSvg";
 import UserLocationSvg from "../assets/svg/UserLocationSvg";
-import { moderateScale } from "../Metrics";
+import * as Location from "expo-location";
+
 import CanceledPage from "../components/CanceledPage";
 
 const MapHomeScreen = () => {
@@ -152,33 +153,41 @@ const MapHomeScreen = () => {
     setdisplayMenu(false);
   }, []);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (travelTimeInfo !== null && travelTimeInfo?.status !== "NOT_FOUND") {
       setsearching(true);
       let distance = parseFloat(travelTimeInfo.distance.text);
       let duration = travelTimeInfo.duration.text;
 
       setsubstep("search");
-      setDoc(
-        doc(db, "Ride Requests", currentUser?.phone),
-        {
-          driverAccepted: false,
-          clientAccepted: false,
-          user: user,
-          origin: origin,
-          destination: destination,
-          clientDistance: distance,
-          canceled: false,
-          duration,
-        },
-        { merge: true }
-      )
-        .then(() => {
-          setsearching(false);
-          setcurrentStep("confirm");
-          handleSearchForDriver(false);
-        })
-        .catch((err) => {});
+      await Location.getCurrentPositionAsync({}).then(async (location) => {
+        setDoc(
+          doc(db, "Ride Requests", currentUser?.phone),
+          {
+            driverAccepted: false,
+            clientAccepted: false,
+            user: user,
+            origin: {
+              location: {
+                lat: location.coords.latitude,
+                lng: location.coords.longitude,
+              },
+              description: origin.description,
+            },
+            destination: destination,
+            clientDistance: distance,
+            canceled: false,
+            duration,
+          },
+          { merge: true }
+        )
+          .then(() => {
+            setsearching(false);
+            setcurrentStep("confirm");
+            handleSearchForDriver(false);
+          })
+          .catch((err) => {});
+      });
     } else {
     }
   };
