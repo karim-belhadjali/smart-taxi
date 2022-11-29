@@ -15,7 +15,7 @@ import {
 
 import * as Location from "expo-location";
 import * as Network from "expo-network";
-const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
+const GOOGLE_MAPS_API_KEY = "AIzaSyA_MBIonc47YR-XXXSReEO0gBBsMV_3Ppw";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -38,7 +38,7 @@ import AppLink from "react-native-app-link";
 export default function App() {
   const navigation = useNavigation();
 
-  const version = "1.0.7";
+  const version = "1.1.0";
 
   const [reload, setreload] = useState(false);
   const dispatch = useDispatch();

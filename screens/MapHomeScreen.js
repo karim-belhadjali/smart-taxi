@@ -38,7 +38,7 @@ import { onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
 
 import tw from "twrnc";
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
+const GOOGLE_MAPS_API_KEY = "AIzaSyA_MBIonc47YR-XXXSReEO0gBBsMV_3Ppw";
 
 import SearchPage from "../components/SearchPage";
 import HomeMap from "../components/HomeMap";
@@ -332,6 +332,12 @@ const MapHomeScreen = () => {
             dispatch(setDriverLocation(null));
             dispatch(setDestination(null));
             unsub();
+          } else if (request.canceled) {
+            setcurrentStep("home");
+            setsubstep("search");
+            dispatch(setDriverLocation(null));
+            dispatch(setDestination(null));
+            unsub();
           }
         }
       }
@@ -363,7 +369,11 @@ const MapHomeScreen = () => {
     const lessBusyHours = [9, 10, 16, 19];
     let price = 0;
 
-    price = (startcounter + parseFloat(distanceClient) * 0.85).toFixed(3);
+    if (nightyHours.includes(hour)) {
+      price = (startcounter + parseFloat(distanceClient) * 1.5).toFixed(3);
+    } else {
+      price = (startcounter + parseFloat(distanceClient) * 0.8).toFixed(3);
+    }
 
     return price;
   };

@@ -25,7 +25,7 @@ import TunisiaSvg from "../assets/svg/TunisiaSvg";
 import NextBtn from "../components/NextBtn";
 import { moderateScale } from "../Metrics";
 
-const OTP_KEY = "b86a2a1a-5a08-48a4-8071-dea8dfcbb752";
+const OTP_KEY = "0f5b38df-4933-49bc-8f50-6173ec0e28d1";
 
 const LoginScreen = () => {
   const { width, height } = Dimensions.get("window");
