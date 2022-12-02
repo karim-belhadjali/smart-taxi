@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "smart-taxi",
+    "name": "Beem Smart Taxi",
     "slug": "smart-taxi",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -16,13 +16,19 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "y"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.beem.smarttaxi",
+      "config": {
+        "googleMaps": { "apiKey": "AIzaSyDwJOa0mkDuoudmaCLEHQUiQmBB2hn8fZc" }
+      },
+      "versionCode": 7
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -36,6 +42,11 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "57c75e1a-c0c2-423c-913f-6e5d2c919247"
+      }
+    }
   }
 }

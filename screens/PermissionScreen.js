@@ -10,11 +10,12 @@ import {
   Image,
   StatusBar,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 
 import * as Location from "expo-location";
 import * as Network from "expo-network";
-import { GOOGLE_MAPS_API_KEY } from "@env";
+const GOOGLE_MAPS_API_KEY = "AIzaSyA_MBIonc47YR-XXXSReEO0gBBsMV_3Ppw";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -22,18 +23,24 @@ import {
   selectCurrentLocation,
   setCurrentLocation,
   setCurrentUser,
+  setVersion,
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import tw from "twrnc";
 import { useFonts } from "expo-font";
 import LogoSvg from "../assets/svg/LogoSvg";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../firebase";
+
+import AppLink from "react-native-app-link";
 
 export default function App() {
   const navigation = useNavigation();
 
+  const version = "1.1.0";
+
   const [reload, setreload] = useState(false);
-  const [errorMsg, setErrorMsg] = useState(null);
   const dispatch = useDispatch();
   useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins/Poppins-Black.ttf"),
@@ -71,23 +78,28 @@ export default function App() {
               const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.coords.latitude},${location.coords.longitude}&key=${GOOGLE_MAPS_API_KEY}`;
               const response = await fetch(url);
               const data = await response.json();
+              let adress;
+              if (data.results[0]?.formatted_address) {
+                adress = data.results[0]?.formatted_address;
+              } else {
+                adress = "inconnu";
+              }
               dispatch(
                 setCurrentLocation({
                   location: {
                     lat: location.coords.latitude,
                     lng: location.coords.longitude,
                   },
-                  description: data.results[0]?.formatted_address,
+                  description: adress,
                 })
               );
-              await getUser("Client");
+              await getVersion();
             })
             .catch((e) => {
-              setErrorMsg(e.message);
+              setreload(!reload);
             });
         }
       } else {
-        setErrorMsg("No Internet Connection is detected please try again");
         Alert.alert(
           "Connexion Internet non détectée",
           "Aucune connexion Internet n'est détectée, veuillez réessayer",
@@ -142,6 +154,40 @@ export default function App() {
       });
     }
   };
+  const getVersion = async () => {
+    const docRef = doc(db, "versions", "kLJoU0er6GIOQoLVh9gU");
+    const docSnap = await getDoc(docRef);
+    if (docSnap?.exists()) {
+      if (docSnap.data().name === version) {
+        dispatch(setVersion(version));
+        await getUser("Client");
+      } else {
+        Alert.alert(
+          "Nouvelle mise à jour détectée",
+          "Nouvelle mise à jour détectée, veuillez mettre à jour l'application vers la dernière version",
+          [
+            {
+              text: "Mettre à jour",
+              onPress: () => {
+                AppLink.openInStore({
+                  appName: "Beem Smart Taxi",
+                  playStoreId: "com.beem.smarttaxi",
+                });
+              },
+            },
+            {
+              text: "Réessayer",
+              onPress: () => {
+                setreload(!reload);
+              },
+            },
+          ]
+        );
+      }
+    } else {
+      await getUser("Client");
+    }
+  };
 
   const handleTryAgain = () => {
     setreload(!reload);
@@ -152,6 +198,7 @@ export default function App() {
         style={tw`flex justify-center items-center overflow-visible h-full`}
       >
         <LogoSvg style={tw`justify-center items-center `} />
+        <ActivityIndicator size={"large"} style={tw`mt-10`} color="#7A3BFF" />
       </View>
     </View>
   );
@@ -163,6 +210,6 @@ const stylesheet = StyleSheet.create({
     left: 0,
     width: Dimensions.get("window").width,
     height: Dimensions.get("window").height + StatusBar.currentHeight,
-    backgroundColor: "#431879",
+    backgroundColor: "#fff",
   },
 });

@@ -13,7 +13,7 @@ import FinalCarSvg from "../assets/svg/FinalCarSvg";
 import StarSvg from "../assets/svg/StarSvg";
 import { moderateScale } from "../Metrics";
 
-const FinishedPage = ({ ride, OnFinish }) => {
+const CanceledPage = ({ ride, OnFinish }) => {
   const { width, height } = Dimensions.get("window");
 
   let place;
@@ -72,7 +72,7 @@ const FinishedPage = ({ ride, OnFinish }) => {
           adjustsFontSizeToFit
           allowFontScaling={false}
         >
-          {ride?.price} TND
+          Course annulée
         </Text>
         <Text
           style={[
@@ -83,7 +83,7 @@ const FinishedPage = ({ ride, OnFinish }) => {
           adjustsFontSizeToFit
           allowFontScaling={false}
         >
-          Paiement Cash
+          {ride?.price} TND
         </Text>
       </View>
       <View
@@ -121,6 +121,6 @@ const FinishedPage = ({ ride, OnFinish }) => {
   );
 };
 
-export default FinishedPage;
+export default CanceledPage;
 
 const styles = StyleSheet.create({});

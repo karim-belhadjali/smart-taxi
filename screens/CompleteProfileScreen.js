@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   View,
   ScrollView,
-  StatusBar,
   ActivityIndicator,
+  Platform,
+  SafeAreaView,
+  Dimensions,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 
@@ -27,8 +29,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { selectUserInfo, setCurrentUser } from "../app/slices/navigationSlice";
 import { doc, setDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "expo-status-bar";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import InputGeneral from "../components/InputGeneral";
+import { moderateScale } from "../Metrics";
 
 const CompleteProfileScreen = () => {
+  const { width, height } = Dimensions.get("window");
+
   const navigation = useNavigation();
   let userinfo = useSelector(selectUserInfo);
   const dispatch = useDispatch();
@@ -41,7 +49,7 @@ const CompleteProfileScreen = () => {
   const [showerror, setshowerror] = useState(undefined);
 
   const [selectedGov, setselectedGov] = useState("Ben Arous");
-  const [selectedVille, setselectedVille] = useState("Rades");
+  const [selectedVille, setselectedVille] = useState("");
   const [currentDate, setcurrentDate] = useState(new Date(Date.now()));
   const [codePostal, setcodePostal] = useState("");
 
@@ -51,10 +59,96 @@ const CompleteProfileScreen = () => {
   const [firstGroupDisabled, setfirstGroupDisabled] = useState(false);
   const [secondGroupDisabled, setsecondGroupDisabled] = useState(true);
 
-  const gouvernorats = ["ben arous", "ariana", "mannouba"];
-  const ville = ["Hammem-lif", "ezzahra", "rades"];
-
-  const statusBarHeight = StatusBar.currentHeight;
+  const gouvernorats = [
+    "Ariana",
+    "Beja",
+    "Ben Arous",
+    "Bizerte",
+    "Gabès",
+    "Gafsa",
+    "Jendouba",
+    "Kairouan",
+    "Kasserine",
+    "Kébili",
+    "Kef",
+    "Mahdia",
+    "Manouba",
+    "Médenine",
+    "Monastir",
+    "Nabeul",
+    "Sfax",
+    "Sidi Bouzid",
+    "Siliana",
+    "Sousse",
+    "Tataouine",
+    "Tozeur",
+    "Tunis",
+    "Zaghouan",
+  ];
+  const govs = [
+    { key: 1, section: true, label: "Ariana" },
+    { key: 2, label: "Beja" },
+    { key: 3, label: "Ben Arous" },
+    { key: 4, label: "Bizerte" },
+    { key: 5, label: "Gabès" },
+    { key: 6, label: "Gafsa" },
+    { key: 7, label: "Jendouba" },
+    { key: 8, label: "Kairouan" },
+    { key: 9, label: "Kasserine" },
+    { key: 10, label: "Kébili" },
+    { key: 11, label: "Kef" },
+    { key: 12, label: "Mahdia" },
+    { key: 13, label: "Médenine" },
+    { key: 14, label: "Manouba" },
+    { key: 15, label: "Monastir" },
+    { key: 16, label: "Nabeul" },
+    { key: 17, label: "Sfax" },
+    { key: 18, label: "Sidi Bouzid" },
+    { key: 19, label: "Siliana" },
+    { key: 20, label: "Sousse" },
+    { key: 21, label: "Tataouine" },
+    { key: 22, label: "Tozeur" },
+    { key: 23, label: "Tunis" },
+    { key: 24, label: "Zaghouan" },
+  ];
+  const ville = [
+    "Ariana",
+    "Beja",
+    "Ben Arous",
+    "Bizerte",
+    "Gabès",
+    "Gafsa",
+    "Jendouba",
+    "Kairouan",
+    "Kasserine",
+    "Kébili",
+    "Kef",
+    "Mahdia",
+    "Manouba",
+    "Médenine",
+    "Monastir",
+    "Nabeul",
+    "Sfax",
+    "Sidi Bouzid",
+    "Siliana",
+    "Sousse",
+    "Tataouine",
+    "Tozeur",
+    "Tunis",
+    "Zaghouan",
+  ];
+  const villes = [
+    { key: 1, section: true, label: "Fruits" },
+    { key: 2, label: "Red Apples" },
+    { key: 3, label: "Cherries" },
+    { key: 4, label: "Cranberries" },
+    { key: 5, label: "Pink Grapefruit" },
+    { key: 6, label: "Raspberries" },
+    { key: 8, label: "Beets" },
+    { key: 9, label: "Red Peppers" },
+    { key: 7, label: "Radishes" },
+    { key: 41, label: "Red Onions" },
+  ];
 
   const handleStep1Click = () => {
     if (
@@ -84,25 +178,11 @@ const CompleteProfileScreen = () => {
       setcurrentStep("step3");
     } else {
       setsaving(true);
-      setDoc(
-        doc(db, "clients", userinfo.phone),
-        {
-          fullName: fullName,
-          email: email,
-          gouvernorat: selectedGov,
-          ville: selectedVille,
-          birthDate: currentDate.toString(),
-          codePostal: codePostal,
-          attendance: { main: mainGroup, secondary: subGroup },
-          phone: userinfo?.phone,
-        },
-        {
-          merge: true,
-        }
-      )
-        .then(async () => {
-          dispatch(
-            setCurrentUser({
+      createUserWithEmailAndPassword(auth, email, `${userinfo.phone}`)
+        .then(() => {
+          setDoc(
+            doc(db, "clients", userinfo.phone),
+            {
               fullName: fullName,
               email: email,
               gouvernorat: selectedGov,
@@ -111,20 +191,52 @@ const CompleteProfileScreen = () => {
               codePostal: codePostal,
               attendance: { main: mainGroup, secondary: subGroup },
               phone: userinfo?.phone,
+            },
+            {
+              merge: true,
+            }
+          )
+            .then(async () => {
+              dispatch(
+                setCurrentUser({
+                  fullName: fullName,
+                  email: email,
+                  gouvernorat: selectedGov,
+                  ville: selectedVille,
+                  birthDate: currentDate.toString(),
+                  codePostal: codePostal,
+                  attendance: { main: mainGroup, secondary: subGroup },
+                  phone: userinfo?.phone,
+                })
+              );
+              await storeUser({
+                fullName: fullName,
+                email: email,
+                gouvernorat: selectedGov,
+                ville: selectedVille,
+                birthDate: currentDate,
+                codePostal: codePostal,
+                attendance: { main: mainGroup, secondary: subGroup },
+                phone: userinfo?.phone,
+              });
             })
-          );
-          await storeUser({
-            fullName: fullName,
-            email: email,
-            gouvernorat: selectedGov,
-            ville: selectedVille,
-            birthDate: currentDate,
-            codePostal: codePostal,
-            attendance: { main: mainGroup, secondary: subGroup },
-            phone: userinfo?.phone,
-          });
+            .catch((err) => {
+              setcurrentStep("step1");
+
+              var errorCode = err.code;
+              var errorMessage = err.message;
+              if (errorCode == "auth/email-already-in-use") {
+                showerror({
+                  text: "Cet e-mail est déjà utilisée",
+                });
+              } else {
+                showerror({
+                  text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
+                });
+              }
+            });
         })
-        .catch((err) => {
+        .catch(() => {
           setcurrentStep("step1");
           showerror({
             text: "un problème est survenu lors de la sauvegarde de l'utilisateur, contactez l'équipe d'assistance",
@@ -185,7 +297,15 @@ const CompleteProfileScreen = () => {
           {currentStep === "step1" && (
             <>
               <View style={[styles.styleSEnregistrer, tw`mb-5`]}>
-                <Text style={{ fontFamily: "Poppins-SemiBold", fontSize: 30 }}>
+                <Text
+                  style={{
+                    fontFamily: "Poppins-SemiBold",
+                    fontSize: width * 0.07,
+                  }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  allowFontScaling={false}
+                >
                   S'enregistrer
                 </Text>
               </View>
@@ -209,9 +329,12 @@ const CompleteProfileScreen = () => {
                   <Text
                     style={{
                       fontFamily: "Poppins-Regular",
-                      fontSize: 14,
+                      fontSize: width * 0.035,
                       color: "#F74C00",
                     }}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    allowFontScaling={false}
                   >
                     {showerror.text}
                   </Text>
@@ -222,23 +345,49 @@ const CompleteProfileScreen = () => {
           )}
           {currentStep === "step2" && (
             <View style={tw`w-full ml-[15%]`}>
-              <DatePicker onSelect={setcurrentDate} />
-              <PickerList
-                title="Lieu de résidence principal"
-                selectedValue={selectedGov}
-                setSelectedLanguage={setselectedGov}
-                items={gouvernorats}
-              />
-              <PickerList
-                selectedValue={selectedVille}
-                setSelectedLanguage={setselectedVille}
-                items={ville}
-              />
-              <Input
-                placeHolder="Code postal"
-                value={codePostal}
-                onChangeText={setcodePostal}
-              />
+              {Platform.OS === "android" && (
+                <>
+                  <DatePicker onSelect={setcurrentDate} />
+                  <PickerList
+                    title="Lieu de résidence principal"
+                    selectedValue={selectedGov}
+                    setSelectedLanguage={setselectedGov}
+                    items={gouvernorats}
+                  />
+                  <InputGeneral
+                    placeHolder="Ville"
+                    value={selectedVille}
+                    onChangeText={setselectedVille}
+                  />
+                  <Input
+                    placeHolder="Code postal"
+                    value={codePostal}
+                    onChangeText={setcodePostal}
+                  />
+                </>
+              )}
+              {Platform.OS !== "android" && (
+                <>
+                  <DatePicker onSelect={setcurrentDate} />
+                  <PickerList
+                    title="Lieu de résidence principal"
+                    selectedValue={"Gouvernorat"}
+                    setSelectedLanguage={setselectedGov}
+                    items={gouvernorats}
+                  />
+
+                  <InputGeneral
+                    placeHolder="Ville"
+                    value={selectedVille}
+                    onChangeText={setselectedVille}
+                  />
+                  <Input
+                    placeHolder="Code postal"
+                    value={codePostal}
+                    onChangeText={setcodePostal}
+                  />
+                </>
+              )}
             </View>
           )}
           {currentStep === "step3" && (
@@ -250,9 +399,12 @@ const CompleteProfileScreen = () => {
                 style={{
                   width: "80%",
                   fontFamily: "Poppins-Regular",
-                  fontSize: 15,
-                  lineHeight: 30,
+                  fontSize: width * 0.05,
+                  lineHeight: 20,
                 }}
+                numberOfLines={3}
+                adjustsFontSizeToFit
+                allowFontScaling={false}
               >
                 En précisant votre fréquence d'utilisation des taxis vous pouvez
                 recevoir un service adapté à vos besoins et plusieurs avantages
@@ -338,13 +490,20 @@ const CompleteProfileScreen = () => {
           )}
           {currentStep !== "step1" && (
             <View
-              style={tw`absolute bottom-3 w-screen flex flex-row justify-between px-8 `}
+              style={tw`absolute bottom-[${
+                Dimensions.get("window").height < 720 ? 5 : 3
+              }] ios:bottom-10 w-screen flex flex-row justify-between px-8 `}
             >
               <TouchableOpacity
                 style={tw`rounded-full bg-[#fff] w-45%  p-4 flex justify-center items-center`}
                 onPress={handleNext}
               >
-                <Text style={[styles.btn, styles.ignore]}>Ignorer</Text>
+                <Text
+                  style={[styles.btn, styles.ignore]}
+                  allowFontScaling={false}
+                >
+                  Ignorer
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -352,14 +511,19 @@ const CompleteProfileScreen = () => {
                 ]}
                 onPress={handleNext}
               >
-                <Text style={[styles.btn, styles.next]}>Suivant</Text>
+                <Text
+                  style={[styles.btn, styles.next]}
+                  allowFontScaling={false}
+                >
+                  Suivant
+                </Text>
               </TouchableOpacity>
             </View>
           )}
         </KeyboardAvoidingView>
       )}
       {saving && (
-        <View style={tw`h-screen w-screen`}>
+        <SafeAreaView style={tw`h-full w-screen `}>
           <View
             style={[
               StyleSheet.absoluteFill,
@@ -373,8 +537,9 @@ const CompleteProfileScreen = () => {
           >
             <ActivityIndicator size={80} color="#F74C00" />
           </View>
-        </View>
+        </SafeAreaView>
       )}
+      <StatusBar style="light" />
     </>
   );
 };
@@ -389,18 +554,18 @@ const styles = StyleSheet.create({
   },
   ellipse2: {
     position: "absolute",
-    left: 159,
-    top: -164,
+    left: -33,
+    top: -158,
     backgroundColor: "#431879B8",
     width: 283,
     height: 283,
   },
   ellipse1: {
     position: "absolute",
-    left: -33,
-    top: -126,
+    left: 159,
+    top: -130,
     backgroundColor: "#431879",
-    opacity: 0.9,
+
     width: 283,
     height: 283,
   },
@@ -417,7 +582,7 @@ const styles = StyleSheet.create({
     width: "80%",
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    fontSize: 30,
+    fontSize: moderateScale(30),
   },
   inputContainer: {
     width: "80%",

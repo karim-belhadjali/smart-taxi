@@ -4,7 +4,12 @@ import tw from "twrnc";
 import ModalSelector from "react-native-modal-selector";
 
 import { Picker } from "@react-native-picker/picker";
-const PickerList = ({ title, selectedValue, setSelectedLanguage, items }) => {
+const PickerListVille = ({
+  title,
+  selectedValue,
+  setSelectedLanguage,
+  items,
+}) => {
   return (
     <>
       {Platform.OS === "android" && (
@@ -30,7 +35,13 @@ const PickerList = ({ title, selectedValue, setSelectedLanguage, items }) => {
               itemStyle={{ height: 50, backgroundColor: "transparent" }}
             >
               {items.map((value) => {
-                return <Picker.Item key={value} label={value} value={value} />;
+                return (
+                  <Picker.Item
+                    key={value.city}
+                    label={value.city}
+                    value={value.city}
+                  />
+                );
               })}
             </Picker>
           </View>
@@ -63,7 +74,7 @@ const PickerList = ({ title, selectedValue, setSelectedLanguage, items }) => {
   );
 };
 
-export default PickerList;
+export default PickerListVille;
 
 const styles = StyleSheet.create({
   text: {

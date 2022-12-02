@@ -1,15 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
   StatusBar,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-  Button,
-  ActivityIndicator,
-  FlatList,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
 } from "react-native";
 import {
   selectDestination,
@@ -17,6 +16,7 @@ import {
   selectCurrentLocation,
   selectCurrentUser,
   selectDriverLocation,
+  selectVersion,
 } from "../app/slices/navigationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -26,31 +26,19 @@ import {
   setDriverLocation,
   selectTravelTimeInfo,
 } from "../app/slices/navigationSlice";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import Entypo from "react-native-vector-icons/Entypo";
-import EvilIcons from "react-native-vector-icons/EvilIcons";
-
+import AntDesign from "react-native-vector-icons/AntDesign";
+import MenuItem from "../components/MenuItem";
 import MapView, { Marker } from "react-native-maps";
 
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import MapViewDirections from "react-native-maps-directions";
 
-import { auth, functions, httpsCallable, db } from "../firebase";
-import {
-  query,
-  onSnapshot,
-  collection,
-  doc,
-  setDoc,
-  deleteDoc,
-} from "firebase/firestore";
-import { LogBox } from "react-native";
+import { db } from "../firebase";
+import { onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
 
 import tw from "twrnc";
-const GOOGLE_MAPS_API_KEY = "AIzaSyCZ_g1IKyfqx-UNjhGKnIbZKPF9rAzVJwg";
 
-import Svg, { Path } from "react-native-svg";
-import NavFavourites from "../components/NavFavourites";
+const GOOGLE_MAPS_API_KEY = "AIzaSyA_MBIonc47YR-XXXSReEO0gBBsMV_3Ppw";
 
 import SearchPage from "../components/SearchPage";
 import HomeMap from "../components/HomeMap";
@@ -60,13 +48,15 @@ import WaitingRide from "../components/Rides/WaitingRide";
 import OngoingRide from "../components/Rides/OngoingRide";
 import FinishedPage from "../components/FinishedPage";
 import { useNavigation } from "@react-navigation/core";
+import MapCarSvg from "../assets/svg/MapCarSvg";
+import UserLocationSvg from "../assets/svg/UserLocationSvg";
+import * as Location from "expo-location";
+
+import CanceledPage from "../components/CanceledPage";
 
 const MapHomeScreen = () => {
+  const { width, height } = Dimensions.get("window");
   const navigation = useNavigation();
-  LogBox.ignoreLogs([
-    "TypeError: undefined is not an object (evaluating 'request.driverInfo.name')",
-  ]);
-
   const dispatch = useDispatch();
   const origin = useSelector(selectOrigin);
   const destination = useSelector(selectDestination);
@@ -74,6 +64,7 @@ const MapHomeScreen = () => {
   const currentLocation = useSelector(selectCurrentLocation);
   const travelTimeInfo = useSelector(selectTravelTimeInfo);
   const driverLocation = useSelector(selectDriverLocation);
+  const version = useSelector(selectVersion);
   const user = useSelector(selectCurrentUser);
   const mapRef = useRef(null);
 
@@ -84,14 +75,18 @@ const MapHomeScreen = () => {
   const [currentRide, setcurrentRide] = useState(null);
 
   const [currentLocationActive, setcurrentLocationActive] = useState(true);
-  const [destinationDispaly, setdestinationDispaly] = useState(false);
   const [destinationText, setdestinationText] = useState("");
   const [originText, setoriginText] = useState();
   const [searching, setsearching] = useState(false);
   const [currentStep, setcurrentStep] = useState("home");
   const [substep, setsubstep] = useState("search");
   const [mapHeight, setmapHeight] = useState("60%");
-  const [displayMenu, setdisplayMenu] = useState("false");
+  const [displayMenu, setdisplayMenu] = useState(false);
+
+  // Animations menu
+  const screenWidth = Dimensions.get("window").width;
+  const leftpos = useRef(new Animated.Value(-screenWidth)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (!origin || !destination || currentStep !== "confirm") return;
@@ -106,13 +101,14 @@ const MapHomeScreen = () => {
   }, [origin, destination]);
 
   useEffect(() => {
-    if (!origin || !destination || currentStep !== "confirm") return;
     setTimeout(() => {
       mapRef?.current?.fitToSuppliedMarkers(["origin", "destination"], {
         edgePadding: { top: 150, right: 100, bottom: 50, left: 100 },
         duration: 1000,
       });
     }, 300);
+
+    if (!origin || !destination || currentStep !== "confirm") return;
   }, [currentStep]);
 
   useEffect(() => {
@@ -154,34 +150,44 @@ const MapHomeScreen = () => {
 
   useEffect(() => {
     setsearching(false);
+    setdisplayMenu(false);
   }, []);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (travelTimeInfo !== null && travelTimeInfo?.status !== "NOT_FOUND") {
       setsearching(true);
       let distance = parseFloat(travelTimeInfo.distance.text);
       let duration = travelTimeInfo.duration.text;
+
       setsubstep("search");
-      setDoc(
-        doc(db, "Ride Requests", currentUser?.phone),
-        {
-          driverAccepted: false,
-          clientAccepted: false,
-          user: user,
-          origin: origin,
-          destination: destination,
-          clientDistance: distance,
-          canceled: false,
-          duration,
-        },
-        { merge: true }
-      )
-        .then(() => {
-          setsearching(false);
-          setcurrentStep("confirm");
-          handleSearchForDriver(false);
-        })
-        .catch((err) => {});
+      await Location.getCurrentPositionAsync({}).then(async (location) => {
+        setDoc(
+          doc(db, "Ride Requests", currentUser?.phone),
+          {
+            driverAccepted: false,
+            clientAccepted: false,
+            user: user,
+            origin: {
+              location: {
+                lat: location.coords.latitude,
+                lng: location.coords.longitude,
+              },
+              description: origin.description,
+            },
+            destination: destination,
+            clientDistance: distance,
+            canceled: false,
+            duration,
+          },
+          { merge: true }
+        )
+          .then(() => {
+            setsearching(false);
+            setcurrentStep("confirm");
+            handleSearchForDriver(false);
+          })
+          .catch((err) => {});
+      });
     } else {
     }
   };
@@ -297,34 +303,71 @@ const MapHomeScreen = () => {
     const unsub = onSnapshot(
       doc(db, "Current Courses", currentUser?.phone),
       async (current) => {
-        const request = current.data();
-
-        if (!request.finished) {
-          dispatch(setDriverLocation(request?.driverInfo?.location));
-        }
-        if (request.driverArrived && request.driveStarted === false) {
-          setDoc(
-            doc(db, "Current Courses", currentUser?.phone),
-            { driveStarted: true },
-            {
-              merge: true,
-            }
-          )
-            .then(() => {
-              setcurrentRide(request);
-              setsubstep("onGoing");
-              dispatch(setOrigin(null));
-            })
-            .catch((err) => {});
-        } else if (request.finished) {
-          setcurrentStep("finished");
+        if (!current.exists()) {
+          setcurrentStep("canceled");
           setsubstep("search");
           dispatch(setDriverLocation(null));
           dispatch(setDestination(null));
           unsub();
+        } else {
+          const request = current.data();
+
+          if (!request.finished) {
+            dispatch(setDriverLocation(request?.driverInfo?.location));
+          }
+          if (request.driverArrived && request.driveStarted === false) {
+            setDoc(
+              doc(db, "Current Courses", currentUser?.phone),
+              { driveStarted: true },
+              {
+                merge: true,
+              }
+            )
+              .then(() => {
+                setcurrentRide(request);
+                setsubstep("onGoing");
+                dispatch(setOrigin(null));
+              })
+              .catch((err) => {});
+          } else if (request.finished) {
+            setcurrentStep("finished");
+            setsubstep("search");
+            dispatch(setDriverLocation(null));
+            dispatch(setDestination(null));
+            unsub();
+          } else if (request.canceledByDriver) {
+            setcurrentStep("canceled");
+            setsubstep("search");
+            dispatch(setDriverLocation(null));
+            dispatch(setDestination(null));
+            unsub();
+          } else if (request.canceled) {
+            setcurrentStep("home");
+            setsubstep("search");
+            dispatch(setDriverLocation(null));
+            dispatch(setDestination(null));
+            unsub();
+          }
         }
       }
     );
+  };
+
+  const handleCancelCurrentRide = () => {
+    setDoc(
+      doc(db, "Current Courses", currentUser?.phone),
+      {
+        canceledByClient: true,
+      },
+      { merge: true }
+    )
+      .then(async () => {
+        setcurrentStep("canceled");
+        setsubstep("search");
+        dispatch(setDriverLocation(null));
+        dispatch(setDestination(null));
+      })
+      .catch((err) => {});
   };
 
   const calculatePrice = async (distanceClient, distanceDriver) => {
@@ -335,9 +378,46 @@ const MapHomeScreen = () => {
     const lessBusyHours = [9, 10, 16, 19];
     let price = 0;
 
-    price = (startcounter + parseFloat(distanceClient) * 1.1).toFixed(3);
+    if (nightyHours.includes(hour)) {
+      price = (startcounter + parseFloat(distanceClient) * 1.5).toFixed(3);
+    } else {
+      price = (startcounter + parseFloat(distanceClient) * 0.8).toFixed(3);
+    }
 
     return price;
+  };
+
+  //Animations functions
+
+  const handleOpenMenu = () => {
+    setdisplayMenu(true);
+
+    Animated.timing(leftpos, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => {
+      Animated.timing(opacity, {
+        toValue: 0.2,
+        duration: 100,
+        useNativeDriver: false,
+      }).start();
+    });
+  };
+  const handleCloseMenu = () => {
+    setdisplayMenu(false);
+
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 20,
+      useNativeDriver: false,
+    }).start(() => {
+      Animated.timing(leftpos, {
+        toValue: -screenWidth,
+        duration: 300,
+        useNativeDriver: false,
+      }).start();
+    });
   };
 
   return (
@@ -347,6 +427,9 @@ const MapHomeScreen = () => {
     >
       {currentStep !== "confirm" &&
         currentStep !== "finished" &&
+        currentStep !== "canceled" &&
+        currentStep !== "search" &&
+        !displayMenu &&
         searching === false && (
           <View
             style={[
@@ -354,7 +437,9 @@ const MapHomeScreen = () => {
             ]}
           >
             <TouchableOpacity
-              onPress={() => navigation.navigate("MainDrawer")}
+              onPress={() => {
+                handleOpenMenu();
+              }}
               style={tw`bg-gray-50 p-3 mt-1 w-12 h-12 rounded-full shadow-lg mr-3`}
             >
               <Entypo name="menu" size={25} />
@@ -396,10 +481,7 @@ const MapHomeScreen = () => {
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
-            mapType="mutedStandard"
-            provider="google"
             style={tw`w-screen h-[${mapHeight}]`}
-            zoomEnabled={true}
           >
             {origin && destination && (
               <MapViewDirections
@@ -407,7 +489,7 @@ const MapHomeScreen = () => {
                 destination={`${destination.location.lat},${destination.location.lng}`}
                 apikey={GOOGLE_MAPS_API_KEY}
                 strokeWidth={3}
-                strokeColor="blue"
+                strokeColor="#F74C00"
                 lineDashPattern={[0]}
               />
             )}
@@ -417,7 +499,7 @@ const MapHomeScreen = () => {
                 destination={`${driverLocation.location.lat},${driverLocation.location.lng}`}
                 apikey={GOOGLE_MAPS_API_KEY}
                 strokeWidth={5}
-                strokeColor="red"
+                strokeColor="#F74C00"
                 lineDashPattern={[0]}
               />
             )}
@@ -442,7 +524,9 @@ const MapHomeScreen = () => {
                 title="current"
                 description={currentLocation.description}
                 identifier="current"
-              />
+              >
+                <UserLocationSvg />
+              </Marker>
             )}
             {driverLocation && (
               <Marker
@@ -456,7 +540,8 @@ const MapHomeScreen = () => {
                 description={driverLocation.description}
                 identifier="driver"
               >
-                <EvilIcons size={50} name="location" color="#8B8000" />
+                {/* <EvilIcons size={50} name="location" color="#8B8000" /> */}
+                <MapCarSvg />
               </Marker>
             )}
             {origin?.location && (
@@ -470,7 +555,9 @@ const MapHomeScreen = () => {
                 title="Origin"
                 description={origin.description}
                 identifier="origin"
-              />
+              >
+                <UserLocationSvg />
+              </Marker>
             )}
 
             {destination?.location && (
@@ -510,6 +597,7 @@ const MapHomeScreen = () => {
             <WaitingRide
               ride={currentRide}
               onCall={() => setsubstep("onGoing")}
+              cancelRide={handleCancelCurrentRide}
             />
           )}
           {substep === "onGoing" && (
@@ -535,6 +623,90 @@ const MapHomeScreen = () => {
           }}
         />
       )}
+      {currentStep == "canceled" && (
+        <CanceledPage
+          ride={currentRide}
+          OnFinish={() => {
+            setdestinationText("");
+            setoriginText("");
+            setcurrentStep("home");
+            setsubstep("search");
+            setcurrentRide(null);
+          }}
+        />
+      )}
+
+      <Animated.View
+        style={[
+          tw`flex flex-row w-screen h-screen android:mt-[${StatusBar.currentHeight}]`,
+          StyleSheet.absoluteFill,
+          { left: leftpos },
+        ]}
+      >
+        <View style={tw`bg-[#FFFFFF]  w-[75%] flex items-center`}>
+          <View style={tw`w-[90%] flex flex-row mt-5`}>
+            <View
+              style={tw`bg-[#431879] rounded-full w-12 h-12 flex justify-center items-center`}
+            >
+              <AntDesign style={tw``} name={"user"} size={25} color={"#ffff"} />
+            </View>
+            <Text
+              style={[
+                tw`mt-3 mx-3`,
+                { fontFamily: "Poppins-Bold", fontSize: width * 0.05 },
+              ]}
+              numberOfLines={1}
+              allowFontScaling={false}
+            >
+              {user?.fullName}
+            </Text>
+          </View>
+          <View style={tw`bg-[#000000] opacity-10 h-[.45] w-full mt-5`} />
+          <View style={tw`mt-5 w-[90%]`}>
+            <MenuItem
+              iconName={"hearto"}
+              text="Profile"
+              onClick={() => navigation.navigate("Profile")}
+            />
+            <View style={tw`opacity-30`}>
+              <MenuItem
+                iconName={"clockcircleo"}
+                text="Historique"
+                onClick={() => console.log("disabled")}
+              />
+            </View>
+            <MenuItem
+              iconName={"infocirlceo"}
+              text="À propos"
+              onClick={() => {
+                navigation.navigate("À propos");
+              }}
+            />
+          </View>
+          <Text
+            style={[
+              tw`absolute bottom-2 left-10`,
+              {
+                fontFamily: "Poppins-SemiBold",
+                fontSize: width * 0.04,
+                opacity: 0.5,
+              },
+            ]}
+            allowFontScaling={false}
+          >
+            Beem 2022 - Version {version}
+          </Text>
+        </View>
+        <Animated.View style={[tw`bg-[#000000] w-[25%]`, { opacity: opacity }]}>
+          <TouchableOpacity
+            activeOpacity={0}
+            style={[tw`bg-transparent w-full h-full`]}
+            onPress={() => {
+              handleCloseMenu();
+            }}
+          />
+        </Animated.View>
+      </Animated.View>
     </KeyboardAvoidingView>
   );
 };

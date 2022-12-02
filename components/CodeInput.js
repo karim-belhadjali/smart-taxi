@@ -6,7 +6,6 @@ const CodeInput = ({ index, active, onChange }) => {
   const ref = useRef();
 
   if (index == active) {
-    console.log(ref.current.focus());
   }
 
   const handleChange = (codeNumber) => {
@@ -27,6 +26,7 @@ const CodeInput = ({ index, active, onChange }) => {
         textContentType="telephoneNumber"
         onChangeText={(codeNumber) => handleChange(codeNumber)}
         maxLength={1}
+        allowFontScaling={false}
       />
     </View>
   );

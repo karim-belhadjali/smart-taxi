@@ -41,13 +41,7 @@ const HomeNavigation = () => {
           headerShown: false,
         }}
       />
-      <Stack.Screen
-        name="AboutScreen"
-        component={AboutScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
+      <Stack.Screen name="À propos" component={AboutScreen} />
       <Stack.Screen
         name="MainDrawer"
         component={MainDrawer}

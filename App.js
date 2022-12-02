@@ -19,6 +19,7 @@ import tw from "twrnc";
 import HomeNavigation from "./components/HomeNavigation";
 import * as Location from "expo-location";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 
 export default function App() {
   useDeviceContext(tw);
@@ -41,6 +42,7 @@ export default function App() {
           <HomeNavigation />
         </SafeAreaProvider>
       </NavigationContainer>
+      <StatusBar style="dark" />
     </Provider>
   );
 }
