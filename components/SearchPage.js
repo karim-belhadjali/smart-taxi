@@ -27,7 +27,7 @@ import {
 } from "../app/slices/navigationSlice";
 import tw from "twrnc";
 import { moderateScale } from "../Metrics";
-const GOOGLE_MAPS_API_KEY = "AIzaSyA_MBIonc47YR-XXXSReEO0gBBsMV_3Ppw";
+const GOOGLE_MAPS_API_KEY = "";
 
 const SearchPage = ({
   handleback,
