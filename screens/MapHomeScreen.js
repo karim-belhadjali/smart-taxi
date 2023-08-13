@@ -38,7 +38,7 @@ import { onSnapshot, doc, setDoc, deleteDoc } from "firebase/firestore";
 
 import tw from "twrnc";
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyA_MBIonc47YR-XXXSReEO0gBBsMV_3Ppw";
+const GOOGLE_MAPS_API_KEY ="";
 
 import SearchPage from "../components/SearchPage";
 import HomeMap from "../components/HomeMap";
